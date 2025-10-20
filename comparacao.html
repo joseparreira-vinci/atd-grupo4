@@ -1,0 +1,301 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Comparação de Contribuintes — Dashboard Inspetivo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+  <style>
+    .comparison{display:flex;gap:12px}
+    .contrib{width:50%}
+    .tabs{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+    .tab{padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.02);cursor:pointer}
+    .tab.active{background:linear-gradient(90deg,var(--accent),#7c3aed);color:#021427}
+    .evidence{margin-top:8px}
+    .evi-item{padding:10px;border-radius:8px;margin-bottom:8px;background:rgba(255,255,255,0.01)}
+    .source{font-size:12px;color:var(--muted)}
+
+    .ai-analysis{background:linear-gradient(180deg,rgba(96,165,250,0.06),transparent);padding:12px;border-radius:10px;margin-top:12px}
+    .actions{display:flex;gap:8px;margin-top:12px}
+
+    /* Melhorias nas tabelas */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 14px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    table thead {
+      background: linear-gradient(90deg, var(--accent), #7c3aed);
+      color: #021427;
+      font-weight: 600;
+    }
+    table th, table td {
+      padding: 12px 8px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    table tbody tr:nth-child(even) {
+      background: rgba(255,255,255,0.02);
+    }
+    table tbody tr:hover {
+      background: rgba(96,165,250,0.1);
+      transition: background 0.2s;
+    }
+    table tbody tr.highlight {
+      background: rgba(255,231,230,0.5);
+    }
+    table tbody tr.total {
+      background: rgba(96,165,250,0.1);
+      font-weight: bold;
+    }
+
+    .irregularidade { background-color: #fee2e2; color: #dc2626; font-weight: bold; padding: 2px 4px; border-radius: 3px; }
+
+    /* responsive */
+    @media (max-width:980px){
+      .comparison{flex-direction:column}
+      .contrib{width:100%}
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="topbar">
+      <div class="brand">
+        <div class="hamburger" id="hamburger" aria-label="Abrir menu" title="Menu">
+          <div class="bars"></div>
+        </div>
+        <img src="logo-at.png" alt="Logo ATD" class="logo">
+        <div>
+          <div style="font-weight:700">Painel Inspetivo — Antónia</div>
+          <div style="font-size:12px;color:var(--muted)">Comparação de Contribuintes</div>
+        </div>
+      </div>
+      <select id="fiscal-year" style="padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:var(--bg);color:var(--muted);">
+        <option value="2023">Ano Fiscal 2023</option>
+        <option value="2024">Ano Fiscal 2024</option>
+        <option value="2025" selected>Ano Fiscal 2025</option>
+      </select>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="menu-title">Menu</div>
+        <button class="btn ghost close-btn" onclick="closeSidebar()" style="font-size:18px;">×</button>
+      </div>
+      <div class="menu-list">
+        <a class="menu-item" href="dashboard.html">Dashboard</a>
+        <a class="menu-item" href="contribuintes.html">Contribuintes</a>
+        <a class="menu-item" href="casos.html">Casos Fechados</a>
+        <a class="menu-item" href="relatorios.html">Relatórios</a>
+        <a class="menu-item" href="equipa.html">Equipa</a>
+        <a class="menu-item" href="gestor.html">Gestor</a>
+        <a class="menu-item" href="elearning.html">Elearning</a>
+        <a class="menu-item" href="notificacoes.html">Notificações</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h2>Comparação entre <span id="nif1"></span> e <span id="nif2"></span></h2>
+        <div>
+          <button class="btn ghost" onclick="goToFinal()">Finalizar</button>
+          <button class="btn ghost" onclick="backToContrib()">Voltar</button>
+        </div>
+      </div>
+
+      <div class="card ai-analysis">
+        <h3>Análise Comparativa Inteligente</h3>
+        <p><strong>Irregularidades Identificadas:</strong></p>
+        <ul>
+          <li><strong>Contribuinte 1 (NIF: <span id="nif1-irreg"></span>):</strong> Possível subdeclaração de custos no IVA T2 (vendas €135.000 vs compras €90.000), inconsistências entre IRS e MOD40 (rendimentos declarados €4.500 vs €5.000 reportados), subavaliação patrimonial em imóveis (apartamento €250.000 vs mercado €350.000). E-Fatura com padrões de transações com fornecedores de baixo risco. Risco médio de evasão, com pendências em IMI e IVA T3.</li>
+          <li><strong>Contribuinte 2 (NIF: <span id="nif2-irreg"></span>):</strong> Irregularidades mais graves no IVA (vendas €180.000 vs compras €95.000 em T2, saldos elevados em todos os trimestres), dívidas fiscais elevadas (€15.200, incluindo IVA T3 €13.800 e IMI €5.125), omissões significativas no IRS (rendimentos €3.200 vs €6.500 MOD40), património com avaliações questionáveis (mansão €800.000 pendente) e E-Fatura com 15 erros detetados. Anexo C não apresentado nas acessórias. Risco alto de evasão sistemática.</li>
+        </ul>
+        <p><strong>Diferenças Notáveis:</strong> O Contribuinte 2 apresenta perfil de risco muito superior, com discrepâncias maiores em IVA e IRS, dívidas acumuladas e património subavaliado. Possível ligação entre os dois contribuintes através de transações intra-grupo não declaradas (VIES indica €120.000 para Contribuinte 2 vs €65.000 para Contribuinte 1). Diferenças em IRC mostram Contribuinte 2 com lucros mais elevados mas custos relativamente baixos. Recomendações: Investigação conjunta prioritária, cruzamento de dados E-Fatura e VIES, análise de transações entre os NIFs, perícia patrimonial para ambos, e possível abertura de processo inspetivo conjunto para mapear redes de evasão.</p>
+      </div>
+
+      <div class="comparison">
+        <div class="contrib">
+          <h3>Contribuinte 1: <span id="name1"></span></h3>
+          <div class="tabs" id="tabs1">
+            <div class="tab" data-tab="certidao">Certidão Permanente</div>
+            <div class="tab" data-tab="cadastro">Sistema Cadastral</div>
+            <div class="tab" data-tab="irs">IRS</div>
+            <div class="tab" data-tab="irc">IRC</div>
+            <div class="tab" data-tab="iva">IVA</div>
+            <div class="tab" data-tab="patrimonio">Património</div>
+            <div class="tab" data-tab="dividas">Dívidas Fiscais</div>
+            <div class="tab" data-tab="efatura">E-Fatura</div>
+            <div class="tab" data-tab="acessorias">Declarações Acessórias</div>
+            <div class="tab" data-tab="vies">VIES</div>
+            <div class="tab" data-tab="mod40">MOD40</div>
+            <div class="tab" data-tab="dmr">DMR</div>
+          </div>
+          <div id="modulos-info1"></div>
+        </div>
+        <div class="contrib">
+          <h3>Contribuinte 2: <span id="name2"></span></h3>
+          <div class="tabs" id="tabs2">
+            <div class="tab" data-tab="certidao">Certidão Permanente</div>
+            <div class="tab" data-tab="cadastro">Sistema Cadastral</div>
+            <div class="tab" data-tab="irs">IRS</div>
+            <div class="tab" data-tab="irc">IRC</div>
+            <div class="tab" data-tab="iva">IVA</div>
+            <div class="tab" data-tab="patrimonio">Património</div>
+            <div class="tab" data-tab="dividas">Dívidas Fiscais</div>
+            <div class="tab" data-tab="efatura">E-Fatura</div>
+            <div class="tab" data-tab="acessorias">Declarações Acessórias</div>
+            <div class="tab" data-tab="vies">VIES</div>
+            <div class="tab" data-tab="mod40">MOD40</div>
+            <div class="tab" data-tab="dmr">DMR</div>
+          </div>
+          <div id="modulos-info2"></div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Sidebar hamburger
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('hamburger').addEventListener('click',()=>{
+      sidebar.classList.toggle('open');
+    });
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+    }
+
+    // Close sidebar on link click
+    document.querySelectorAll('.menu-item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        sidebar.classList.remove('open');
+      });
+    });
+
+    // Simulação de dados para contribuintes
+    const contribData = {
+      '123456789': {
+        name: 'Empresa A, Lda.',
+        nif: '123456789',
+        modulos: {
+          certidao: '<h4>Certidão Permanente</h4><p>Documento oficial que comprova a situação fiscal atual do contribuinte perante a Autoridade Tributária.</p><ul><li><strong>Situação Fiscal:</strong> Regular (sem dívidas pendentes)</li><li><strong>Dívidas Fiscais Totais:</strong> €0,00</li><li><strong>Última Atualização:</strong> 01/10/2025</li><li><strong>Certificado de Não Dívida:</strong> Emitido em 15/09/2025 (válido por 6 meses)</li><li><strong>Declarações Pendentes:</strong> Nenhuma</li></ul><p><em>Análise:</em> Contribuinte em situação regular, sem impedimentos fiscais.</p><br><button class="btn primary" onclick="downloadModule(\'certidao\', \'1\')">Download Ficheiro Certidão</button>',
+          cadastro: '<h4>Sistema Cadastral</h4><p>Registo completo dos dados identificativos e fiscais do contribuinte no sistema da AT.</p><ul><li><strong>Nome/Razão Social:</strong> Empresa A, Lda.</li><li><strong>NIF:</strong> 123456789</li><li><strong>Morada Fiscal:</strong> Rua das Flores, 123, 1000-001 Lisboa</li><li><strong>CAE (Atividade):</strong> 4752 - Comércio a retalho de eletrodomésticos</li><li><strong>Data de Constituição:</strong> 01/01/2010</li><li><strong>Estado Atual:</strong> Ativo</li><li><strong>Regime Fiscal:</strong> Normal</li><li><strong>Contactos:</strong> Tel: 211234567 | Email: empresa.a@exemplo.pt</li></ul><p><em>Análise:</em> Dados atualizados, sem alterações pendentes.</p><br><button class="btn primary" onclick="downloadModule(\'cadastro\', \'1\')">Download Ficheiro Cadastro</button>',
+          irs: '<h4>IRS - Imposto sobre o Rendimento das Pessoas Singulares</h4><p>Declaração anual de rendimentos pessoais. Taxas progressivas aplicáveis.</p><h5>Última Declaração (Ano 2024)</h5><table><thead><tr><th>Fonte de Rendimento</th><th>Valor Bruto (€)</th><th>Deduções (€)</th><th>Valor Líquido (€)</th><th>Taxa (%)</th><th>Imposto (€)</th></tr></thead><tbody><tr><td>Trabalho Dependente</td><td>28.000</td><td>4.000</td><td>24.000</td><td>20</td><td>4.800</td></tr><tr class="highlight"><td>Rendimentos de Capital</td><td>4.500</td><td>0</td><td>4.500</td><td>10</td><td>450</td></tr><tr><td>Rendas de Imóveis</td><td>12.000</td><td>2.000</td><td>10.000</td><td>15</td><td>1.500</td></tr><tr><td>Pensões</td><td>8.000</td><td>1.500</td><td>6.500</td><td>10</td><td>650</td></tr><tr><td>Outros Rendimentos</td><td>2.000</td><td>500</td><td>1.500</td><td>15</td><td>225</td></tr><tr class="total"><td>Total</td><td>54.500</td><td>8.000</td><td>46.500</td><td>-</td><td>7.625</td></tr></tbody></table><p><strong>Estado da Declaração:</strong> Apresentada em 31/05/2025 | Processada | Reembolso de €1.200 solicitado</p><p><em>Análise:</em> A declaração apresenta rendimentos diversificados, com predominância de trabalho dependente (51% do total), seguido de rendas imobiliárias e pensões. As deduções aplicadas (€8.000) estão dentro dos limites legais, otimizando a carga fiscal. <span class="irregularidade">No entanto, os rendimentos de capital declarados em €4.500 (linha destacada em amarelo) contrastam com o total acumulado na MOD40 de €5.000, indicando uma omissão de €500.</span> Esta discrepância pode representar rendimentos não declarados, como dividendos ocultos ou juros de contas não reportadas, impactando a tributação progressiva e potencialmente configurando evasão fiscal. Recomenda-se cruzamento imediato com registos MOD40, investigação de fontes de capital e aplicação de correções retroativas, incluindo juros e penalidades. O reembolso solicitado deve ser suspenso até esclarecimento.</p><br><button class="btn primary" onclick="downloadModule(\'irs\', \'1\')">Download Ficheiro IRS</button>',
+          irc: '<h4>IRC - Imposto sobre o Rendimento das Pessoas Coletivas</h4><p>Declaração anual para empresas. Taxa normal de 21%.</p><h5>Última Declaração (Ano 2024)</h5><table><thead><tr><th>Item</th><th>Valor (€)</th></tr></thead><tbody><tr><td>Receitas Totais</td><td>250.000</td></tr><tr><td>Custos e Deduções</td><td>180.000</td></tr><tr><td>Lucro Antes de Impostos</td><td>70.000</td></tr><tr><td>Benefícios Fiscais (I&D)</td><td>-7.000</td></tr><tr><td>Lucro Tributável</td><td>63.000</td></tr><tr><td>Taxa Aplicada</td><td>21%</td></tr><tr class="total"><td>Imposto Devido</td><td>13.230</td></tr></tbody></table><p><strong>Estado:</strong> Apresentada em 15/06/2025 | Paga em 30/06/2025</p><p><em>Análise:</em> Empresa rentável com investimentos em inovação. Sugere manutenção de benefícios fiscais.</p><br><button class="btn primary" onclick="downloadModule(\'irc\', \'1\')">Download Ficheiro IRC</button>',
+          iva: '<h4>IVA - Imposto sobre o Valor Acrescentado</h4><p>Imposto sobre consumo. Declarações trimestrais obrigatórias.</p><h5>Declarações Recentes</h5><table><thead><tr><th>Período</th><th>Vendas (€)</th><th>Compras (€)</th><th>IVA Devido (€)</th><th>IVA Dedicado (€)</th><th>Saldo (€)</th><th>Estado</th></tr></thead><tbody><tr><td>2025-T1</td><td>120.000</td><td>80.000</td><td>27.600</td><td>18.400</td><td>9.200</td><td style="color:green;">Pago</td></tr><tr class="highlight"><td>2025-T2</td><td>135.000</td><td>90.000</td><td>31.050</td><td>20.700</td><td>10.350</td><td style="color:green;">Pago</td></tr><tr><td>2025-T3</td><td>110.000</td><td>75.000</td><td>25.300</td><td>17.250</td><td>8.050</td><td style="color:red;">Pendente</td></tr></tbody></table><p><strong>Taxa Normal:</strong> 23% | <strong>Faturação Eletrónica:</strong> Ativa | <strong>Última Comunicação:</strong> 05/10/2025</p><p><em>Análise:</em> O fluxo de IVA apresenta regularidade nos trimestres T1 e T3, com saldos proporcionais às operações. <span class="irregularidade">No entanto, o T2 destaca-se por vendas de €135.000 contra compras de apenas €90.000, resultando em um saldo de IVA a pagar de €10.350, superior aos trimestres adjacentes.</span> Esta discrepância sugere possível subdeclaração de custos, atividade económica não declarada ou utilização de faturas falsas para reduzir a base tributável. Comparado com o histórico, o aumento súbito em vendas sem correspondência em compras indica risco de evasão através de circuitos paralelos ou triangulações. Recomenda-se auditoria detalhada das faturas do T2, cruzamento com extratos bancários e verificação de fornecedores. O período T3 pendente deve ser regularizado urgentemente para evitar juros de mora e penalidades adicionais.</p><br><button class="btn primary" onclick="downloadModule(\'iva\', \'1\')">Download Ficheiro IVA</button>',
+          patrimonio: '<h4>Património</h4><p>Impostos sobre bens imóveis, móveis e rendimentos patrimoniais.</p><h5>Imóveis (IMI)</h5><table><thead><tr><th>Descrição</th><th>Valor Patrimonial (€)</th><th>Taxa (%)</th><th>IMI (€)</th><th>Estado</th></tr></thead><tbody><tr class="highlight"><td>Apartamento T3 Lisboa</td><td>250.000</td><td>0.4</td><td>1.000</td><td style="color:green;">Pago</td></tr><tr><td>Armazém Industrial Porto</td><td>180.000</td><td>0.35</td><td>630</td><td style="color:green;">Pago</td></tr><tr><td>Loja Centro Histórico</td><td>300.000</td><td>0.45</td><td>1.350</td><td style="color:red;">Pendente</td></tr></tbody></table><h5>Veículos (IUC)</h5><table><thead><tr><th>Propriedade</th><th>Valor</th></tr></thead><tbody><tr><th>Veículo</th><td>BMW X3 2.0</td></tr><tr><th>Cilindrada</th><td>1995cc</td></tr><tr><th>Emissões CO2</th><td>150g/km</td></tr><tr><th>IUC Anual</th><td>€180</td></tr><tr><th>Estado</th><td style="color:green;">Pago</td></tr></tbody></table><h5>Rendas</h5><p>Rendimentos anuais: €15.000 | Taxa IRS: 15% | Imposto: €2.250</p><p><em>Análise:</em> O património apresenta diversificação entre imóveis urbanos e industriais, além de veículos de gama alta. <span class="irregularidade">O apartamento em Lisboa, avaliado em €250.000 (destacado em amarelo), está significativamente subavaliado em comparação com o valor de mercado estimado em €350.000, permitindo redução artificial do IMI em €400 anuais. Esta discrepância pode indicar tentativa de evasão fiscal através de subavaliação intencional, potencialmente configurando crime de omissão de rendimentos.</span> As rendas declaradas (€15.000 anuais) estão abaixo do mercado para imóveis similares, sugerindo possível utilização para lavagem de capitais ou ocultação de fluxos financeiros. Recomenda-se perícia independente para reavaliação dos imóveis, cruzamento com transações imobiliárias recentes e investigação de rendas efetivamente recebidas. O IMI pendente da loja deve ser regularizado para evitar execuções.</p><br><button class="btn primary" onclick="downloadModule(\'patrimonio\', \'1\')">Download Ficheiro Património</button>',
+          dividas: '<h4>Dívidas Fiscais</h4><p>Resumo das obrigações fiscais pendentes.</p><ul><li><strong>Total Dívida:</strong> €7.850</li><li><strong>IVA 2025-T3:</strong> €8.050 (vencimento 15/11/2025)</li><li><strong>IMI 2025:</strong> €1.350 (vencimento 31/10/2025)</li><li><strong>Juros de Mora:</strong> €450 (acumulados)</li></ul><p><strong>Plano de Pagamento:</strong> Solicitado - 12 prestações mensais de €654</p><p><em>Análise:</em> Dívidas controláveis. Plano de pagamento recomendado para evitar execuções fiscais.</p><br><button class="btn primary" onclick="downloadModule(\'dividas\', \'1\')">Download Ficheiro Dívidas</button>',
+          efatura: '<h4>E-Fatura</h4><p>Sistema obrigatório de comunicação de faturas à AT.</p><ul><li><strong>Estado do Sistema:</strong> Ativo e Validado</li><li><strong>Faturas Emitidas (2025):</strong> 1.450</li><li><strong>Valor Total Faturado:</strong> €380.000</li><li><strong>Última Comunicação:</strong> 08/10/2025</li><li><strong>Erros Detetados:</strong> 2 (corrigidos)</li><li><strong>Certificação:</strong> Nível Ouro</li></ul><p><em>Análise:</em> O sistema E-Fatura está plenamente operacional, com 1.450 faturas emitidas totalizando €380.000 em 2025, indicando atividade comercial intensa. A certificação Nível Ouro confirma conformidade técnica. <span class="irregularidade">No entanto, análise dos padrões de faturação revela transações frequentes com fornecedores classificados como de baixo risco fiscal, possivelmente utilizados como "testas de ferro" para ocultar fluxos financeiros reais.</span> Os 2 erros detetados e corrigidos podem indicar tentativas de manipulação inicial. Recomenda-se análise detalhada dos destinatários das faturas, cruzamento com cadastros fiscais e verificação de autenticidade das operações para identificar possíveis triangulações ou emissões fraudulentas. Manter o sistema atualizado é essencial para prevenir fraudes futuras.</p><br><button class="btn primary" onclick="downloadModule(\'efatura\', \'1\')">Download Ficheiro E-Fatura</button>',
+          acessorias: '<h4>Declarações Acessórias</h4><p>Documentos complementares às declarações principais.</p><ul><li><strong>Anexo A (IRS):</strong> Rendimentos de Capital - Apresentado</li><li><strong>Anexo B (IRC):</strong> Deduções Especiais - Apresentado</li><li><strong>Anexo C:</strong> Benefícios Fiscais - Apresentado</li><li><strong>Quadro 10 (IVA):</strong> Operações Intracomunitárias - Apresentado</li><li><strong>Data Apresentação:</strong> 31/05/2025</li><li><strong>Estado:</strong> Validados pela AT</li></ul><p><em>Análise:</em> Documentação completa. Sem pendências.</p><br><button class="btn primary" onclick="downloadModule(\'acessorias\', \'1\')">Download Ficheiro Acessórias</button>',
+          vies: '<h4>VIES - Sistema de Informação sobre o IVA na UE</h4><p>Verificação de NIFs para transações intracomunitárias.</p><ul><li><strong>NIF Intracomunitário:</strong> PT123456789</li><li><strong>Estado de Validação:</strong> Válido</li><li><strong>Última Verificação:</strong> 01/10/2025</li><li><strong>Transações Intra-UE (2025):</strong> €65.000</li><li><strong>Países Parceiros:</strong> Espanha, França, Alemanha</li><li><strong>Certificado VIES:</strong> Emitido</li></ul><p><em>Análise:</em> Ativo para comércio europeu. Verificar periodicamente.</p><br><button class="btn primary" onclick="downloadModule(\'vies\', \'1\')">Download Ficheiro VIES</button>',
+          mod40: '<h4>MOD40 - Declaração de Rendimentos de Capitais</h4><p>Declaração trimestral de rendimentos financeiros.</p><h5>Rendimentos Declarados (2025)</h5><table><thead><tr><th>Tipo</th><th>Valor Bruto (€)</th><th>Retenção na Fonte (€)</th><th>Valor Líquido (€)</th></tr></thead><tbody><tr><td>Juros Depósitos</td><td>1.200</td><td>120</td><td>1.080</td></tr><tr><td>Dividendos Ações</td><td>3.000</td><td>300</td><td>2.700</td></tr><tr><td>Rendimentos Fundos</td><td>800</td><td>80</td><td>720</td></tr><tr class="total"><td>Total</td><td>5.000</td><td>500</td><td>4.500</td></tr></tbody></table><p><strong>Estado:</strong> Apresentada em 31/07/2025 | Processada</p><p><em>Análise:</em> A MOD40 acumula €5.000 em rendimentos de capitais para 2025, distribuídos entre juros de depósitos, dividendos de ações e rendimentos de fundos. Esta declaração trimestral serve como base para a declaração anual de IRS, onde apenas €4.500 foram reportados, indicando uma discrepância de €500. <span class="irregularidade">Possíveis causas incluem omissão de rendimentos adicionais, como juros de contas não declaradas ou dividendos de participações ocultas.</span> A retenção na fonte total de €500 está correta para os valores declarados, mas a inconsistência com o IRS sugere necessidade de investigação para identificar fontes não reportadas. Recomenda-se auditoria dos extratos bancários e declarações de terceiros para esclarecer a origem dos €500 em falta, potencialmente levando a correções fiscais e penalidades por evasão.</p><br><button class="btn primary" onclick="downloadModule(\'mod40\', \'1\')">Download Ficheiro MOD40</button>',
+          dmr: '<h4>DMR - Declaração Mensal de Remunerações</h4><p>Relatório mensal de salários e retenções para empregadores.</p><h5>Última Declaração (Outubro 2025)</h5><table><thead><tr><th>Funcionário</th><th>Salário Bruto (€)</th><th>Retenção IRS (€)</th><th>TSU (€)</th><th>Segurança Social (€)</th></tr></thead><tbody><tr><td>João Silva</td><td>2.200</td><td>330</td><td>242</td><td>304</td></tr><tr><td>Maria Santos</td><td>1.900</td><td>285</td><td>209</td><td>262</td></tr><tr><td>Carlos Pereira</td><td>1.600</td><td>240</td><td>176</td><td>221</td></tr><tr class="total"><td>Total</td><td>5.700</td><td>855</td><td>627</td><td>787</td></tr></tbody></table><p><strong>Número de Funcionários:</strong> 3 | <strong>Estado:</strong> Apresentada em 10/10/2025</p><p><em>Análise:</em> Conformidade salarial com salários variados. Verificar atualizações salariais para 2026 e possíveis benefícios fiscais para empregadores.</p><br><button class="btn primary" onclick="downloadModule(\'dmr\', \'1\')">Download Ficheiro DMR</button>'
+        }
+      },
+      '987654321': {
+        name: 'Empresa B, S.A.',
+        nif: '987654321',
+        modulos: {
+          certidao: '<h4>Certidão Permanente</h4><p>Documento oficial que comprova a situação fiscal atual do contribuinte perante a Autoridade Tributária.</p><ul><li><strong>Situação Fiscal:</strong> Irregular (dívidas pendentes)</li><li><strong>Dívidas Fiscais Totais:</strong> €15.200</li><li><strong>Última Atualização:</strong> 01/10/2025</li><li><strong>Certificado de Não Dívida:</strong> Não emitido</li><li><strong>Declarações Pendentes:</strong> IVA T3, IMI</li></ul><p><em>Análise:</em> Contribuinte com pendências fiscais significativas. Risco de execução fiscal.</p><br><button class="btn primary" onclick="downloadModule(\'certidao\', \'2\')">Download Ficheiro Certidão</button>',
+          cadastro: '<h4>Sistema Cadastral</h4><p>Registo completo dos dados identificativos e fiscais do contribuinte no sistema da AT.</p><ul><li><strong>Nome/Razão Social:</strong> Empresa B, S.A.</li><li><strong>NIF:</strong> 987654321</li><li><strong>Morada Fiscal:</strong> Avenida da Liberdade, 456, 1250-002 Lisboa</li><li><strong>CAE (Atividade):</strong> 7022 - Serviços de consultoria</li><li><strong>Data de Constituição:</strong> 15/03/2015</li><li><strong>Estado Atual:</strong> Ativo</li><li><strong>Regime Fiscal:</strong> Normal</li><li><strong>Contactos:</strong> Tel: 212345678 | Email: empresa.b@exemplo.pt</li></ul><p><em>Análise:</em> Dados atualizados, mas com alertas de pendências.</p><br><button class="btn primary" onclick="downloadModule(\'cadastro\', \'2\')">Download Ficheiro Cadastro</button>',
+          irs: '<h4>IRS - Imposto sobre o Rendimento das Pessoas Singulares</h4><p>Declaração anual de rendimentos pessoais. Taxas progressivas aplicáveis.</p><h5>Última Declaração (Ano 2024)</h5><table><thead><tr><th>Fonte de Rendimento</th><th>Valor Bruto (€)</th><th>Deduções (€)</th><th>Valor Líquido (€)</th><th>Taxa (%)</th><th>Imposto (€)</th></tr></thead><tbody><tr><td>Trabalho Dependente</td><td>35.000</td><td>5.000</td><td>30.000</td><td>25</td><td>7.500</td></tr><tr class="highlight"><td>Rendimentos de Capital</td><td>3.200</td><td>0</td><td>3.200</td><td>10</td><td>320</td></tr><tr><td>Rendas de Imóveis</td><td>18.000</td><td>3.000</td><td>15.000</td><td>15</td><td>2.250</td></tr><tr class="total"><td>Total</td><td>56.200</td><td>8.000</td><td>48.200</td><td>-</td><td>10.070</td></tr></tbody></table><p><strong>Estado da Declaração:</strong> Apresentada em 31/05/2025 | Processada | Reembolso de €500 solicitado</p><p><em>Análise:</em> Rendimentos elevados, mas rendimentos de capital declarados em €3.200, enquanto MOD40 indica €6.500 total (linha destacada em amarelo mostra discrepância maior). <span class="irregularidade">Esta omissão significativa de €3.300 pode representar rendimentos não declarados substanciais, como dividendos ocultos, juros de contas offshore ou participações societárias não reportadas, impactando severamente a tributação progressiva e configurando possível evasão fiscal sistemática.</span> Recomenda-se investigação imediata, cruzamento com MOD40 e extratos bancários internacionais, aplicação de correções retroativas com juros compostos e penalidades agravadas. O reembolso solicitado deve ser suspenso e convertido em cobrança adicional.</p><br><button class="btn primary" onclick="downloadModule(\'irs\', \'2\')">Download Ficheiro IRS</button>',
+          irc: '<h4>IRC - Imposto sobre o Rendimento das Pessoas Coletivas</h4><p>Declaração anual para empresas. Taxa normal de 21%.</p><h5>Última Declaração (Ano 2024)</h5><table><thead><tr><th>Item</th><th>Valor (€)</th></tr></thead><tbody><tr><td>Receitas Totais</td><td>320.000</td></tr><tr><td>Custos e Deduções</td><td>220.000</td></tr><tr><td>Lucro Antes de Impostos</td><td>100.000</td></tr><tr><td>Benefícios Fiscais (I&D)</td><td>-5.000</td></tr><tr><td>Lucro Tributável</td><td>95.000</td></tr><tr><td>Taxa Aplicada</td><td>21%</td></tr><tr class="total"><td>Imposto Devido</td><td>19.950</td></tr></tbody></table><p><strong>Estado:</strong> Apresentada em 15/06/2025 | Paga em 30/06/2025</p><p><em>Análise:</em> Empresa altamente rentável, mas custos relativamente baixos. Possível subdeclaração de despesas.</p><br><button class="btn primary" onclick="downloadModule(\'irc\', \'2\')">Download Ficheiro IRC</button>',
+          iva: '<h4>IVA - Imposto sobre o Valor Acrescentado</h4><p>Imposto sobre consumo. Declarações trimestrais obrigatórias.</p><h5>Declarações Recentes</h5><table><thead><tr><th>Período</th><th>Vendas (€)</th><th>Compras (€)</th><th>IVA Devido (€)</th><th>IVA Dedicado (€)</th><th>Saldo (€)</th><th>Estado</th></tr></thead><tbody><tr><td>2025-T1</td><td>150.000</td><td>85.000</td><td>34.500</td><td>19.550</td><td>14.950</td><td style="color:green;">Pago</td></tr><tr class="highlight"><td>2025-T2</td><td>180.000</td><td>95.000</td><td>41.400</td><td>21.850</td><td>19.550</td><td style="color:green;">Pago</td></tr><tr><td>2025-T3</td><td>140.000</td><td>80.000</td><td>32.200</td><td>18.400</td><td>13.800</td><td style="color:red;">Pendente</td></tr></tbody></table><p><strong>Taxa Normal:</strong> 23% | <strong>Faturação Eletrónica:</strong> Ativa | <strong>Última Comunicação:</strong> 05/10/2025</p><p><em>Análise:</em> O fluxo de IVA revela um padrão consistente de vendas superiores às compras em todos os trimestres, com saldos elevados de IVA a pagar. <span class="irregularidade">No T2, vendas de €180.000 contra compras de apenas €95.000 resultam em saldo de €19.550, indicando possível subdeclaração sistemática de custos ou existência de atividade económica paralela não tributada.</span> Esta discrepância é mais acentuada que no Contribuinte 1, sugerindo risco maior de evasão através de faturas falsas, triangulações ou ocultação de fornecedores. Comparado com o mercado, os custos parecem artificialmente baixos para o volume de vendas. Recomenda-se investigação aprofundada, incluindo análise de E-Fatura para identificação de transações suspeitas, cruzamento com dados bancários e possível auditoria externa. A pendência no T3 agrava o risco de juros e execuções fiscais.</p><br><button class="btn primary" onclick="downloadModule(\'iva\', \'2\')">Download Ficheiro IVA</button>',
+          patrimonio: '<h4>Património</h4><p>Impostos sobre bens imóveis, móveis e rendimentos patrimoniais.</p><h5>Imóveis (IMI)</h5><table><thead><tr><th>Descrição</th><th>Valor Patrimonial (€)</th><th>Taxa (%)</th><th>IMI (€)</th><th>Estado</th></tr></thead><tbody><tr class="highlight"><td>Mansão Lisboa</td><td>800.000</td><td>0.5</td><td>4.000</td><td style="color:red;">Pendente</td></tr><tr><td>Escritório Centro</td><td>250.000</td><td>0.45</td><td>1.125</td><td style="color:red;">Pendente</td></tr><tr><td>Apartamento Praia</td><td>350.000</td><td>0.4</td><td>1.400</td><td style="color:green;">Pago</td></tr></tbody></table><h5>Veículos (IUC)</h5><table><thead><tr><th>Propriedade</th><th>Valor</th></tr></thead><tbody><tr><th>Veículo</th><td>Mercedes S-Class</td></tr><tr><th>Cilindrada</th><td>2999cc</td></tr><tr><th>Emissões CO2</th><td>180g/km</td></tr><tr><th>IUC Anual</th><td>€350</td></tr><tr><th>Estado</th><td style="color:red;">Pendente</td></tr></tbody></table><h5>Rendas</h5><p>Rendimentos anuais: €25.000 | Taxa IRS: 15% | Imposto: €3.750</p><p><em>Análise:</em> Património valioso com mansão de luxo e veículo premium, mas com avaliações questionáveis e múltiplas pendências. <span class="irregularidade">A mansão avaliada em €800.000 (destacada em amarelo) apresenta valor patrimonial suspeito comparado com imóveis similares na zona, que alcançam €1.200.000-€1.500.000, sugerindo subavaliação intencional para reduzir IMI em €2.000-€3.500 anuais.</span> Esta prática pode configurar crime de omissão de rendimentos patrimoniais, com impacto significativo na tributação. Os escritórios também pendentes indicam padrão de incumprimento sistemático. Recomenda-se perícia independente urgente, cruzamento com registos prediais e avaliação de rendas efetivamente auferidas, que parecem superiores aos €25.000 declarados. O IUC pendente do Mercedes S-Class agrava o perfil de risco, potencialmente levando a penhoras e execuções fiscais imediatas.</p><br><button class="btn primary" onclick="downloadModule(\'patrimonio\', \'2\')">Download Ficheiro Património</button>',
+          dividas: '<h4>Dívidas Fiscais</h4><p>Resumo das obrigações fiscais pendentes.</p><ul><li><strong>Total Dívida:</strong> €15.200</li><li><strong>IVA 2025-T3:</strong> €13.800 (vencimento 15/11/2025)</li><li><strong>IMI 2025:</strong> €5.125 (vencimento 31/10/2025)</li><li><strong>IUC 2025:</strong> €350 (vencimento 31/10/2025)</li><li><strong>Juros de Mora:</strong> €925 (acumulados)</li></ul><p><strong>Plano de Pagamento:</strong> Não solicitado</p><p><em>Análise:</em> Dívidas elevadas e crescentes. Risco alto de execução fiscal iminente.</p><br><button class="btn primary" onclick="downloadModule(\'dividas\', \'2\')">Download Ficheiro Dívidas</button>',
+          efatura: '<h4>E-Fatura</h4><p>Sistema obrigatório de comunicação de faturas à AT.</p><ul><li><strong>Estado do Sistema:</strong> Ativo mas com alertas</li><li><strong>Faturas Emitidas (2025):</strong> 2.100</li><li><strong>Valor Total Faturado:</strong> €470.000</li><li><strong>Última Comunicação:</strong> 08/10/2025</li><li><strong>Erros Detetados:</strong> 15 (alguns corrigidos)</li><li><strong>Certificação:</strong> Nível Prata</li></ul><p><em>Análise:</em> Sistema ativo com volume significativo de faturação (€470.000 em 2.100 faturas), mas com indicadores preocupantes. <span class="irregularidade">Os 15 erros detetados (contra apenas 2 no Contribuinte 1) sugerem manipulação sistemática de faturas, possivelmente para ocultar transações, inflacionar custos ou criar circuitos paralelos de faturação.</span> A certificação Nível Prata (vs Ouro do Contribuinte 1) indica conformidade técnica inferior, potencialmente facilitando fraudes. Recomenda-se análise forense das faturas com erros, cruzamento com E-Fatura do Contribuinte 1 para identificar transações intra-grupo não declaradas, e investigação de destinatários frequentes que podem ser "empresas de fachada". Manter vigilância constante é crucial para prevenir evasão organizada.</p><br><button class="btn primary" onclick="downloadModule(\'efatura\', \'2\')">Download Ficheiro E-Fatura</button>',
+          acessorias: '<h4>Declarações Acessórias</h4><p>Documentos complementares às declarações principais.</p><ul><li><strong>Anexo A (IRS):</strong> Rendimentos de Capital - Apresentado com atraso</li><li><strong>Anexo B (IRC):</strong> Deduções Especiais - Apresentado</li><li><strong>Anexo C:</strong> Benefícios Fiscais - Não apresentado</li><li><strong>Quadro 10 (IVA):</strong> Operações Intracomunitárias - Apresentado</li><li><strong>Data Apresentação:</strong> 15/06/2025</li><li><strong>Estado:</strong> Em processamento</li></ul><p><em>Análise:</em> Documentação incompleta. Anexo C pendente pode indicar irregularidades.</p><br><button class="btn primary" onclick="downloadModule(\'acessorias\', \'2\')">Download Ficheiro Acessórias</button>',
+          vies: '<h4>VIES - Sistema de Informação sobre o IVA na UE</h4><p>Verificação de NIFs para transações intracomunitárias.</p><ul><li><strong>NIF Intracomunitário:</strong> PT987654321</li><li><strong>Estado de Validação:</strong> Válido</li><li><strong>Última Verificação:</strong> 01/10/2025</li><li><strong>Transações Intra-UE (2025):</strong> €120.000</li><li><strong>Países Parceiros:</strong> França, Alemanha, Itália</li><li><strong>Certificado VIES:</strong> Emitido</li></ul><p><em>Análise:</em> Ativo com volume significativo. Verificar transações com Contribuinte 1.</p><br><button class="btn primary" onclick="downloadModule(\'vies\', \'2\')">Download Ficheiro VIES</button>',
+          mod40: '<h4>MOD40 - Declaração de Rendimentos de Capitais</h4><p>Declaração trimestral de rendimentos financeiros.</p><h5>Rendimentos Declarados (2025)</h5><table><thead><tr><th>Tipo</th><th>Valor Bruto (€)</th><th>Retenção na Fonte (€)</th><th>Valor Líquido (€)</th></tr></thead><tbody><tr><td>Juros Depósitos</td><td>2.500</td><td>250</td><td>2.250</td></tr><tr><td>Dividendos Ações</td><td>3.500</td><td>350</td><td>3.150</td></tr><tr><td>Rendimentos Fundos</td><td>500</td><td>50</td><td>450</td></tr><tr class="total"><td>Total</td><td>6.500</td><td>650</td><td>5.850</td></tr></tbody></table><p><strong>Estado:</strong> Apresentada em 31/07/2025 | Processada</p><p><em>Análise:</em> A MOD40 acumula €6.500 em rendimentos de capitais para 2025, distribuídos entre juros, dividendos e fundos. Esta declaração trimestral serve como base para a declaração anual de IRS, onde apenas €3.200 foram reportados, indicando uma discrepância massiva de €3.300. <span class="irregularidade">Esta omissão substancial pode representar rendimentos não declarados de fontes offshore, participações societárias ocultas, ou dividendos de empresas "fantasma", configurando evasão fiscal sistemática com impacto na tributação progressiva e obrigação de declarar no estrangeiro.</span> A retenção na fonte de €650 está correta, mas a inconsistência com o IRS exige investigação imediata, incluindo análise de contas bancárias internacionais e declarações de terceiros. Recomenda-se aplicação de correções retroativas com juros compostos e penalidades agravadas por omissão dolosa.</p><br><button class="btn primary" onclick="downloadModule(\'mod40\', \'2\')">Download Ficheiro MOD40</button>',
+          dmr: '<h4>DMR - Declaração Mensal de Remunerações</h4><p>Relatório mensal de salários e retenções para empregadores.</p><h5>Última Declaração (Outubro 2025)</h5><table><thead><tr><th>Funcionário</th><th>Salário Bruto (€)</th><th>Retenção IRS (€)</th><th>TSU (€)</th><th>Segurança Social (€)</th></tr></thead><tbody><tr><td>Ana Costa</td><td>3.000</td><td>450</td><td>330</td><td>414</td></tr><tr><td>Pedro Lima</td><td>2.500</td><td>375</td><td>275</td><td>345</td></tr><tr><td>Sofia Alves</td><td>2.200</td><td>330</td><td>242</td><td>304</td></tr><tr><td>Ricardo Gomes</td><td>1.800</td><td>270</td><td>198</td><td>248</td></tr><tr class="total"><td>Total</td><td>9.500</td><td>1.425</td><td>1.045</td><td>1.311</td></tr></tbody></table><p><strong>Número de Funcionários:</strong> 4 | <strong>Estado:</strong> Apresentada em 10/10/2025</p><p><em>Análise:</em> Salários elevados com Ana Costa recebendo €3.000 mensais, superior à média do setor para funções similares. Verificar se estes salários correspondem efetivamente à atividade declarada e se não servem para inflacionar custos dedutíveis ou ocultar rendimentos através de "salários fantasma". Recomenda-se cruzamento com declarações individuais de IRS dos funcionários e análise da produtividade vs remuneração.</p><br><button class="btn primary" onclick="downloadModule(\'dmr\', \'2\')">Download Ficheiro DMR</button>'
+        }
+      }
+      // Adicionar mais conforme necessário
+    };
+
+    // Estado dos módulos abertos para cada contribuinte
+    const modulosAbertos1 = {};
+    const modulosAbertos2 = {};
+
+    let nif1, nif2;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Preencher dados a partir do URL
+      const urlParams = new URLSearchParams(window.location.search);
+      nif1 = urlParams.get('nif1');
+      nif2 = urlParams.get('nif2');
+
+      if (nif1 && nif2) {
+        document.getElementById('nif1').innerText = nif1;
+        document.getElementById('nif2').innerText = nif2;
+        document.getElementById('nif1-irreg').innerText = nif1;
+        document.getElementById('nif2-irreg').innerText = nif2;
+
+        const data1 = contribData[nif1] || { name: 'Contribuinte ' + nif1, modulos: {} };
+        const data2 = contribData[nif2] || { name: 'Contribuinte ' + nif2, modulos: {} };
+
+        document.getElementById('name1').innerText = data1.name;
+        document.getElementById('name2').innerText = data2.name;
+
+        // Event listeners para tabs do contribuinte 1
+        document.querySelectorAll('#tabs1 .tab').forEach(tab => {
+          tab.addEventListener('click', (e) => {
+            const tabId = tab.getAttribute('data-tab');
+            if (!data1.modulos[tabId]) return;
+            tab.classList.toggle('active');
+            modulosAbertos1[tabId] = !modulosAbertos1[tabId];
+            renderModulosInfo('modulos-info1', modulosAbertos1, data1.modulos);
+          });
+        });
+
+        // Event listeners para tabs do contribuinte 2
+        document.querySelectorAll('#tabs2 .tab').forEach(tab => {
+          tab.addEventListener('click', (e) => {
+            const tabId = tab.getAttribute('data-tab');
+            if (!data2.modulos[tabId]) return;
+            tab.classList.toggle('active');
+            modulosAbertos2[tabId] = !modulosAbertos2[tabId];
+            renderModulosInfo('modulos-info2', modulosAbertos2, data2.modulos);
+          });
+        });
+      }
+    });
+
+    function renderModulosInfo(containerId, modulosAbertos, modulos) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      Object.keys(modulos).forEach(key => {
+        if (modulosAbertos[key]) {
+          const div = document.createElement('div');
+          div.className = 'card';
+          div.innerHTML = modulos[key];
+          container.appendChild(div);
+        }
+      });
+    }
+
+    function backToContrib(){
+      if (typeof nif1 !== 'undefined' && nif1) {
+        window.location.href = 'detail.html?nif=' + encodeURIComponent(nif1);
+      } else {
+        window.location.href = 'contribuintes.html';
+      }
+    }
+
+    function goToFinal() {
+      window.location.href = 'relatorio_final.html?nif1=' + nif1 + '&nif2=' + nif2;
+    }
+
+    function downloadModule(type, contrib) {
+      alert('Download do ficheiro de ' + type + ' do Contribuinte ' + contrib + ' iniciado.');
+    }
+  </script>
+</body>
+</html>

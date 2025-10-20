@@ -1,0 +1,470 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dashboard Inspetivo — Antónia</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+  <style>
+    header{display:flex;align-items:center;gap:16px}
+
+    /* layout */
+    .layout{display:grid;grid-template-columns:1fr;gap:16px}
+
+    /* left column inside main (team) and right chart */
+    .dashboard{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+    .team{background:var(--card);padding:12px;border-radius:12px}
+    .team h3{margin:0 0 8px 0}
+    .member{display:flex;align-items:center;gap:12px;padding:8px;border-radius:8px;margin-bottom:8px;background:linear-gradient(90deg,rgba(255,255,255,0.01),transparent)}
+    .avatar{width:44px;height:44px;border-radius:8px;background:#0ea5a1;display:flex;align-items:center;justify-content:center;font-weight:700}
+    .m-meta{flex:1}
+    .m-meta small{color:var(--muted);display:block}
+    .m-badges{display:flex;gap:8px;align-items:center}
+    .badge{padding:6px 8px;border-radius:999px;background:rgba(255,255,255,0.03);font-size:12px}
+
+    /* right widgets */
+    .chart-wrap{display:flex;flex-direction:column;align-items:center;padding:20px;text-align:center}
+    .chart-wrap h3{margin-bottom:8px}
+    canvas{max-width:250px;max-height:250px;margin:0 auto}
+
+    /* contributors master list page */
+    .content-area{margin-top:12px}
+    .controls{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+    input[type=search],select{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:inherit}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;text-align:left;border-bottom:1px dashed rgba(255,255,255,0.02);font-size:14px}
+    th{color:var(--muted);font-weight:600}
+    tr:hover{background:linear-gradient(90deg,rgba(255,255,255,0.01),transparent);cursor:pointer}
+
+    /* contributor detail view */
+    .detail{display:flex;gap:12px}
+    .detail-left{width:360px}
+    .tabs{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+    .tab{padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.02);cursor:pointer}
+    .tab.active{background:linear-gradient(90deg,var(--accent),#7c3aed);color:#021427}
+    .evidence{margin-top:8px}
+    .evi-item{padding:10px;border-radius:8px;margin-bottom:8px;background:rgba(255,255,255,0.01)}
+    .source{font-size:12px;color:var(--muted)}
+
+    .ai-analysis{background:linear-gradient(180deg,rgba(96,165,250,0.06),transparent);padding:12px;border-radius:10px;margin-top:12px}
+    .actions{display:flex;gap:8px;margin-top:12px}
+
+    /* responsive */
+    @media (max-width:980px){
+      .layout{grid-template-columns:1fr}
+      .team{display:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="topbar">
+      <div class="brand">
+        <div class="hamburger" id="hamburger" aria-label="Abrir menu" title="Menu">
+          <div class="bars"></div>
+        </div>
+        <img src="logo-at.png" alt="Logo ATD" class="logo">
+        <div>
+          <div style="font-weight:700">Painel Inspetivo — Antónia</div>
+          <div style="font-size:12px;color:var(--muted)">Visão geral do trabalho diário</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:12px;align-items:center">
+        <div style="color:var(--muted);font-size:13px">Bem-vinda, Antónia</div>
+        <select id="fiscal-year" style="padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:var(--bg);color:var(--muted);">
+          <option value="2023">Ano Fiscal 2023</option>
+          <option value="2024">Ano Fiscal 2024</option>
+          <option value="2025" selected>Ano Fiscal 2025</option>
+        </select>
+      </div>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="menu-title">Menu</div>
+        <button class="btn ghost close-btn" onclick="closeSidebar()" style="font-size:18px;">×</button>
+      </div>
+      <div class="menu-list">
+        <a class="menu-item" href="dashboard.html">Dashboard</a>
+        <a class="menu-item" href="contribuintes.html">Contribuintes</a>
+        <a class="menu-item" href="casos.html">Casos Fechados</a>
+        <a class="menu-item" href="relatorios.html">Relatórios</a>
+        <a class="menu-item" href="equipa.html">Equipa</a>
+        <a class="menu-item" href="gestor.html">Gestor</a>
+        <a class="menu-item" href="elearning.html">Elearning</a>
+        <a class="menu-item" href="notificacoes.html">Notificações</a>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <!-- Dashboard view (default) -->
+      <section id="view-dashboard">
+        <div class="dashboard">
+          <div class="team card">
+            <h3>Equipa</h3>
+            <div class="member" onclick="window.location.href='perfil_equipa.html?name=Ana%20Silva'">
+              <div class="avatar">AS</div>
+              <div class="m-meta">
+                <div style="font-weight:700">Ana Silva</div>
+                <small>3 casos • Disponível</small>
+              </div>
+              <div class="m-badges"><div class="badge">Low</div></div>
+            </div>
+            <div class="member" onclick="window.location.href='perfil_equipa.html?name=Miguel%20Torres'">
+              <div class="avatar">MT</div>
+              <div class="m-meta">
+                <div style="font-weight:700">Miguel Torres</div>
+                <small>8 casos • Sobrecarga</small>
+              </div>
+              <div class="m-badges"><div class="badge">High</div></div>
+            </div>
+            <div class="member" onclick="window.location.href='perfil_equipa.html?name=Antónia%20Ferreira'">
+              <div class="avatar">AF</div>
+              <div class="m-meta">
+                <div style="font-weight:700">Antónia Ferreira</div>
+                <small>5 casos • Em progresso</small>
+              </div>
+              <div class="m-badges"><div class="badge">Med</div></div>
+            </div>
+            <div class="member" onclick="window.location.href='perfil_equipa.html?name=Carlos%20Mendes'">
+              <div class="avatar">CM</div>
+              <div class="m-meta">
+                <div style="font-weight:700">Carlos Mendes</div>
+                <small>4 casos • Disponível</small>
+              </div>
+              <div class="m-badges"><div class="badge">Low</div></div>
+            </div>
+          </div>
+
+          <div class="card chart-wrap">
+            <h3>Distribuição das Inspeções</h3>
+            <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Concluídos / Em curso / Não iniciados</div>
+            <canvas id="donut" width="250" height="250"></canvas>
+          </div>
+        </div>
+
+
+
+        <div class="navigation-cards" style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-top:16px">
+          <a href="contribuintes.html" class="card" style="text-align:center;padding:20px;text-decoration:none;outline:none;color:inherit;"><h3>Contribuintes</h3></a>
+          <a href="casos.html" class="card" style="text-align:center;padding:20px;text-decoration:none;outline:none;color:inherit;"><h3>Casos Fechados</h3></a>
+          <a href="relatorios.html" class="card" style="text-align:center;padding:20px;text-decoration:none;outline:none;color:inherit;"><h3>Relatórios</h3></a>
+          <a href="equipa.html" class="card" style="text-align:center;padding:20px;text-decoration:none;outline:none;color:inherit;"><h3>Equipa</h3></a>
+          <a href="gestor.html" class="card" style="text-align:center;padding:20px;text-decoration:none;outline:none;color:inherit;"><h3>Gestor</h3></a>
+          <a href="elearning.html" class="card" style="text-align:center;padding:20px;text-decoration:none;outline:none;color:inherit;"><h3>Elearning</h3></a>
+        </div>
+
+        </div>
+      </section>
+
+      <!-- Contribuintes view -->
+      <section id="view-contribuintes" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h2>Contribuintes</h2>
+          <div style="color:var(--muted);font-size:13px">Ordenar / Filtrar</div>
+        </div>
+
+        <div class="controls">
+          <input type="search" id="search" placeholder="Procurar por nome ou NIF" />
+          <select id="filter-risk"><option value="">Todos os riscos</option><option>Alto</option><option>Médio</option><option>Baixo</option></select>
+        </div>
+
+        <div class="card">
+          <table id="table-contribuintes">
+            <thead><tr><th>Nome / NIF</th><th>Regra</th><th>Risco</th><th>Inspetor</th></tr></thead>
+            <tbody></tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- Contributor detail view -->
+      <section id="view-detail" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <div>
+            <h2 id="detail-name">Contribuinte</h2>
+            <div id="detail-nif" style="color:var(--muted)"></div>
+          </div>
+          <div>
+            <button class="btn ghost" onclick="backToContrib()">Voltar</button>
+            <button class="btn primary" onclick="abrirCaso()">Abrir caso</button>
+          </div>
+        </div>
+
+        <div class="detail">
+          <div class="detail-left">
+            <div class="tabs" id="tabs">
+              <div class="tab active" data-tab="iva">IVA</div>
+              <div class="tab" data-tab="irc">IRC</div>
+              <div class="tab" data-tab="efatura">e-Fatura</div>
+              <div class="tab" data-tab="saft">SAF-T</div>
+              <div class="tab" data-tab="mod40">Mod. 40</div>
+              <div class="tab" data-tab="patrimonio">Decl. Património</div>
+            </div>
+
+            <div class="card">
+              <h4>Provas</h4>
+              <div class="evidence" id="evidence-list">
+                <!-- evidence injected -->
+              </div>
+            </div>
+
+            <div class="ai-analysis card" id="ai-analysis">
+              <h4>Análise automática</h4>
+              <div id="ai-text">A IA analisa as provas e gera aqui uma explicação detalhada sobre padrões de risco, possíveis causas e próximos passos sugeridos.</div>
+              <div class="actions">
+                <button class="btn ghost">Pedir documentação</button>
+                <button class="btn primary">Partilhar com equipa</button>
+              </div>
+            </div>
+          </div>
+
+          <div style="flex:1">
+            <div class="card">
+              <h4>Resumo & gráficos</h4>
+              <div style="display:flex;gap:12px;align-items:center">
+                <div style="flex:1">
+                  <p style="margin:0;color:var(--muted)">Resumo rápido das discrepâncias</p>
+                  <ul id="summary-list"></ul>
+                </div>
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:12px">
+              <h4>Registos e cruzamentos automáticos</h4>
+              <div id="cross-checks" style="color:var(--muted)">Aqui aparecem os resultados do cruzamento entre módulos (IVA vs IRC, SAF-T vs faturas, património vs rendimentos, Mod.40 relações).</div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- Casos view -->
+      <section id="view-casos" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h2>Casos</h2>
+        </div>
+        <div class="card">
+          <ul id="lista-casos"></ul>
+        </div>
+      </section>
+
+      <!-- Relatórios view -->
+      <section id="view-relatorios" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h2>Relatórios</h2>
+        </div>
+        <div class="card">
+          <ul id="lista-relatorios"></ul>
+        </div>
+      </section>
+
+      <!-- Equipa view -->
+      <section id="view-equipa" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h2>Membros da Equipa</h2>
+        </div>
+        <div class="card">
+          <ul>
+            <li>Ana Silva - 3 casos • Disponível</li>
+            <li>Miguel Torres - 8 casos • Sobrecarga</li>
+            <li>Antónia Ferreira - 5 casos • Em progresso</li>
+            <li>Carlos Mendes - 4 casos • Disponível</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Gestor view -->
+      <section id="view-gestor" style="display:none">
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <h2>Perfil do Gestor</h2>
+        </div>
+        <div class="card">
+          <p><strong>Nome:</strong> João Mendes</p>
+          <p><strong>Função:</strong> Gestor de Equipa</p>
+          <p><strong>Responsável por:</strong> Coordenar as inspeções e supervisionar relatórios.</p>
+          <p><strong>Contacto:</strong> joao.mendes@empresa.pt</p>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <script>
+    // Sample data
+    const contribs = [
+      {name:'Empresa A',nif:'123456789',rule:'Diferença IVA/IRC',risk:'Alto',inspector:'Miguel Torres',evidence:[{src:'IVA vs IRC',period:'2023 Q4',rule:'R-IVA-01',desc:'Valores IVA declarados incompatíveis com IRC.'},{src:'SAF-T',period:'2023',rule:'R-SAFT-02',desc:'Faturas registadas não batem com SAF-T.'}]},
+      {name:'Empresa B',nif:'223456789',rule:'Fornecedores inativos',risk:'Médio',inspector:'Ana Silva',evidence:[{src:'Fornecedores',period:'2022',rule:'R-FOR-09',desc:'Relação com fornecedores inativos/externos.'}]},
+      {name:'João Pereira',nif:'323456789',rule:'Património vs Rendimentos',risk:'Baixo',inspector:'Antónia Ferreira',evidence:[{src:'Património',period:'2023',rule:'R-PAT-03',desc:'Património declarado não compatível com rendimentos.'}]}
+    ];
+
+    let casos = [];
+    let relatorios = [];
+
+    // Sidebar hamburger
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('hamburger').addEventListener('click',()=>{
+      sidebar.classList.toggle('open');
+    });
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+    }
+
+    // Menu actions
+    document.querySelectorAll('.menu-item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        const action = el.dataset.action;
+        if(action==='contribuintes') showContribuintes();
+        else showView(action);
+      });
+    });
+
+    function showView(name){
+      const views = ['dashboard', 'contribuintes', 'detail', 'casos', 'relatorios', 'equipa', 'gestor'];
+      views.forEach(v => {
+        document.getElementById('view-' + v).style.display = v === name ? 'block' : 'none';
+      });
+    }
+
+    // Populate contributors table
+    function showContribuintes(){
+      showView('contribuintes');
+      const tbody = document.querySelector('#table-contribuintes tbody'); tbody.innerHTML='';
+      contribs.forEach(c=>{
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${c.name}<div style="font-size:12px;color:var(--muted)">${c.nif}</div></td><td>${c.rule}</td><td>${c.risk}</td><td>${c.inspector}</td>`;
+        tr.addEventListener('click',()=>openContribuinte(c.nif));
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Search/filter
+    document.getElementById('search').addEventListener('input',(e)=>{
+      const q = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('#table-contribuintes tbody tr');
+      rows.forEach(r=>{
+        r.style.display = r.innerText.toLowerCase().includes(q)?'table-row':'none';
+      });
+    });
+
+    document.getElementById('filter-risk').addEventListener('change',(e)=>{
+      const v = e.target.value;
+      const rows = document.querySelectorAll('#table-contribuintes tbody tr');
+      rows.forEach(r=>{
+        if(!v) r.style.display='table-row';
+        else r.style.display = r.cells[2].innerText===v ? 'table-row':'none';
+      });
+    });
+
+    // Open contributor detail
+    function openContribuinte(nif){
+      const c = contribs.find(x=>x.nif===nif) || contribs[0];
+      showView('detail');
+      document.getElementById('detail-name').innerText = c.name;
+      document.getElementById('detail-nif').innerText = c.nif + ' • Regra: ' + c.rule + ' • Risco: ' + c.risk;
+
+      // Evidence
+      const evList = document.getElementById('evidence-list'); evList.innerHTML='';
+      c.evidence.forEach(ev=>{
+        const d = document.createElement('div'); d.className='evi-item';
+        d.innerHTML = `<div style="font-weight:700">${ev.rule} — ${ev.desc}</div><div class="source">Origem: ${ev.src} • Período: ${ev.period}</div>`;
+        evList.appendChild(d);
+      });
+
+      // Summary
+      const sList = document.getElementById('summary-list'); sList.innerHTML='';
+      c.evidence.forEach(ev=>{
+        const li = document.createElement('li'); li.innerText = `${ev.src}: ${ev.rule} (${ev.period}) — ${ev.desc}`; sList.appendChild(li);
+      });
+
+      // AI analysis placeholder (simulate auto-generated text)
+      const ai = document.getElementById('ai-text');
+      ai.innerHTML = generateAnalysis(c);
+    }
+
+    function backToContrib(){ showView('contribuintes'); }
+    function abrirCaso(){
+      const c = document.getElementById('detail-name').innerText;
+      const novoCaso = {id: Date.now(), nome: c + ' - Caso Inspetivo', estado: 'aberto'};
+      casos.push(novoCaso);
+      atualizarCasos();
+      alert('Caso aberto (simulação).');
+    }
+    function novoCaso(){
+      const nome = prompt('Nome do novo caso:');
+      if(nome){
+        const novoCaso = {id: Date.now(), nome, estado: 'aberto'};
+        casos.push(novoCaso);
+        atualizarCasos();
+        showView('casos');
+      }
+    }
+
+    function atualizarCasos(){
+      const lista = document.getElementById('lista-casos');
+      lista.innerHTML = '';
+      casos.forEach(c=>{
+        const li = document.createElement('li');
+        li.innerHTML = `${c.nome} — ${c.estado} <button class='btn primary' onclick='concluirCaso(${c.id})'>Concluir</button>`;
+        lista.appendChild(li);
+      });
+    }
+
+    function concluirCaso(id){
+      const caso = casos.find(x=>x.id===id);
+      caso.estado = 'concluído';
+      relatorios.push({nome: caso.nome + ' — Relatório concluído.'});
+      atualizarCasos();
+      atualizarRelatorios();
+      showView('relatorios');
+    }
+
+    function atualizarRelatorios(){
+      const lista = document.getElementById('lista-relatorios');
+      lista.innerHTML = '';
+      relatorios.forEach(r=>{
+        const li = document.createElement('li');
+        li.innerText = r.nome;
+        lista.appendChild(li);
+      });
+    }
+
+    // Tabs
+    document.getElementById('tabs').addEventListener('click',(e)=>{
+      const tab = e.target.closest('.tab'); if(!tab) return;
+      document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+      tab.classList.add('active');
+      // In real app would load module data for tab
+    });
+
+    function generateAnalysis(c){
+      // Basic heuristic-style analysis for demo
+      let text = '';
+      const hasIvaIrc = c.evidence.some(e=>/IVA|IRC/i.test(e.src)||/IVA/i.test(e.rule)||/IRC/i.test(e.rule));
+      const hasSaft = c.evidence.some(e=>/SAF-T|SAFT/i.test(e.src)||/SAF-T/i.test(e.rule)||/SAFT/i.test(e.rule));
+      if(hasIvaIrc && hasSaft){
+        text += `<p><strong>Interpretação:</strong> Combinação de divergências entre IVA e IRC e inconsistências com SAF-T — padrão que pode indiciar práticas contabilísticas irregulares ou ocultação de faturas.</p>`;
+      } else if(hasIvaIrc){
+        text += `<p><strong>Interpretação:</strong> Divergências entre declarações de IVA e IRC que merecem pedido de esclarecimento e documentação adicional (livros, faturas, reconciliações).</p>`;
+      } else {
+        text += `<p><strong>Interpretação:</strong> Anomalias pontuais detectadas. Recomenda-se validar documentação e acompanhar evolução.</p>`;
+      }
+      text += `<p><strong>Sugestões:</strong> Pedir listagens de faturas, confirmar fornecedores ativos, verificar alterações de sede e consultar histórico de declarações. Se existirem relações atípicas entre entidades, considerar aprofundamento investigativo.</p>`;
+      return text;
+    }
+
+    // Initialize chart
+  const ctx = document.getElementById('donut');
+  const donut = new Chart(ctx,{type:'doughnut',data:{labels:['Concluídos','Em curso','Não iniciados'],datasets:[{data:[42,33,25],backgroundColor:['#60a5fa','#fbbf24','#94a3b8']}]},options:{responsive:false,plugins:{legend:{position:'bottom',labels:{color:'#1e293b'}}}}});
+
+    // Init default
+    showView('dashboard');
+  </script>
+</body>
+</html>
+  </script>
+</body>
+</html>

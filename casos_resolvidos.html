@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Resumo do Caso Submetido — Dashboard Inspetivo</title>
+  <link href="https://fonts.googleapis.com/css2?family/Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+  <style>
+    .contrib-detail {
+      margin-bottom: 16px;
+      padding: 12px;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.02);
+    }
+    .contrib-detail h4 {
+      margin: 0 0 8px 0;
+    }
+    .contrib-detail ul {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .contrib-detail li {
+      margin-bottom: 4px;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="topbar">
+      <div class="brand">
+        <div class="hamburger" id="hamburger" aria-label="Abrir menu" title="Menu">
+          <div class="bars"></div>
+        </div>
+        <img src="logo-at.png" alt="Logo ATD" class="logo">
+        <div>
+          <div style="font-weight:700">Painel Inspetivo — Antónia</div>
+          <div style="font-size:12px;color:var(--muted)">Resumo do Caso Submetido</div>
+        </div>
+      </div>
+        <select id="fiscal-year" style="padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:var(--bg);color:var(--muted);">
+        <option value="2023">Ano Fiscal 2023</option>
+        <option value="2024">Ano Fiscal 2024</option>
+        <option value="2025" selected>Ano Fiscal 2025</option>
+      </select>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="menu-title">Menu</div>
+        <button class="btn ghost close-btn" onclick="closeSidebar()" style="font-size:18px;">×</button>
+      </div>
+      <div class="menu-list">
+        <a class="menu-item" href="dashboard.html">Dashboard</a>
+        <a class="menu-item" href="contribuintes.html">Contribuintes</a>
+        <a class="menu-item" href="casos.html">Casos Fechados</a>
+        <a class="menu-item" href="relatorios.html">Relatórios</a>
+        <a class="menu-item" href="equipa.html">Equipa</a>
+        <a class="menu-item" href="gestor.html">Gestor</a>
+        <a class="menu-item" href="elearning.html">Elearning</a>
+        <a class="menu-item" href="notificacoes.html">Notificações</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <h2>Resumo do Caso Submetido</h2>
+
+      <div class="card">
+        <h3>Detalhes do Caso</h3>
+        <p><strong>NIFs:</strong> <span id="nifs"></span></p>
+        <p><strong>Data Submissão:</strong> <span id="data"></span></p>
+        <p><strong>Ano Fiscal:</strong> 2025</p>
+        <p><strong>Inspetora Responsável:</strong> Antónia Silva</p>
+        <p><strong>Tipo de Caso:</strong> <span id="tipoCaso"></span></p>
+        <p><strong>Status:</strong> Relatório Submetido</p>
+      </div>
+
+      <div class="card">
+  <h3>Análise Submetida</h3>
+  <div id="analise" style="white-space: pre-line; font-family: inherit;">
+RELATÓRIO DE ANÁLISE INSPETIVA - CONTRIBUINTES 123456789 E 987654321
+
+DATA: 10/10/2025
+
+ANO FISCAL: 2025
+
+1. INTRODUÇÃO E CONTEXTO
+Análise comparativa realizada entre dois contribuintes com atividades económicas similares (comércio e serviços), ambos com sistemas E-Fatura ativos e certificados VIES emitidos. A comparação revelou diferenças significativas nos padrões de conformidade fiscal, com o Contribuinte 2 apresentando perfil de risco substancialmente superior.
+
+2. IRREGULARIDADES IDENTIFICADAS
+
+2.1 CONTRIBUINTE 1 (123456789)
+- IVA: Subdeclaração de custos no T2 (€135.000 vendas vs €90.000 compras)
+- IRS: Inconsistência com MOD40 (€4.500 declarados vs €5.000 reportados)
+- Património: Subavaliação imobiliária (€250.000 vs mercado €350.000)
+- E-Fatura: Padrões suspeitos com fornecedores de baixo risco fiscal
+- Dívidas: Pendências em IMI e IVA T3
+RISCO: MÉDIO - Possível evasão localizada
+
+2.2 CONTRIBUINTE 2 (987654321)
+- IVA: Irregularidades graves (€180.000 vendas vs €95.000 compras no T2)
+- IRS: Omissões significativas (€3.200 declarados vs €6.500 MOD40)
+- Património: Avaliações questionáveis (mansão €800.000 pendente)
+- E-Fatura: 15 erros detetados, possível manipulação sistemática
+- Dívidas: €15.200 acumuladas (IVA T3 €13.800, IMI €5.125)
+- Acessórias: Anexo C não apresentado
+RISCO: ALTO - Evasão sistemática provável
+
+3. DIFERENÇAS NOTÁVEIS
+- Contribuinte 2 apresenta discrepâncias 3x maiores em IVA e IRS
+- Volume de transações VIES: €120.000 (C2) vs €65.000 (C1)
+- IRC: Lucros elevados com custos relativamente baixos no C2
+- Possível ligação intra-grupo através de transações não declaradas
+
+4. RECOMENDAÇÕES DE INVESTIGAÇÃO
+4.1 Prioritária: Investigação conjunta dos dois contribuintes
+4.2 Cruzamento de dados E-Fatura e VIES entre NIFs
+4.3 Perícia patrimonial independente para ambos
+4.4 Análise de transações bancárias internacionais
+4.5 Investigação de fornecedores comuns e triangulações
+4.6 Verificação de rendas efetivamente recebidas vs declaradas
+
+5. CONCLUSÃO
+Os padrões identificados sugerem possível rede de evasão fiscal organizada, com o Contribuinte 2 como elemento central. Recomenda-se abertura imediata de processo inspetivo conjunto, com prioridade para medidas cautelares (penhoras, arrestos) no património do Contribuinte 2.
+
+
+Data de geração: 10/10/2025, 12:28:00
+  </div>
+      </div>
+
+      <div class="card">
+        <h3>Irregularidades Identificadas e Insights AI</h3>
+        <div id="irregularidades" style="white-space: pre-line; font-family: inherit;">
+<div style="background: rgba(96,165,250,0.1); padding: 12px; border-radius: 8px; margin-bottom: 12px;">
+  <ul>
+    <li><b>Contribuinte 2 apresenta risco fiscal elevado</b> devido a discrepâncias 3x maiores em IVA e IRS, omissões no MOD40 e dívidas acumuladas superiores a €15.000.</li>
+    <li><b>Conexão suspeita</b> entre os contribuintes identificada por transações intra-grupo não declaradas e diferenças relevantes nos volumes VIES (€120.000 vs €65.000).</li>
+    <li><b>Património subavaliado</b> e ausência de Anexo C sugerem ocultação de ativos e possível evasão organizada.</li>
+    <li><b>Recomenda-se investigação conjunta</b>, perícia patrimonial e análise cruzada de E-Fatura e VIES para mapear redes de evasão.</li>
+    <li><b>Monitorização contínua</b> dos dois contribuintes é aconselhada para deteção precoce de novas irregularidades.</li>
+  </ul>
+</div>
+        </div>
+      </div>
+
+      <button class="btn primary" onclick="backToDashboard()">Voltar ao Dashboard</button>
+    </main>
+  </div>
+
+  <script>
+    // Sidebar hamburger
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('hamburger').addEventListener('click',()=>{
+      sidebar.classList.toggle('open');
+    });
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+    }
+
+    // Close sidebar on link click
+    document.querySelectorAll('.menu-item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        sidebar.classList.remove('open');
+      });
+    });
+
+    // Dados mock dos contribuintes
+    const contribData = {
+      '123456789': {
+        name: 'Empresa A, Lda.',
+        nif: '123456789',
+        morada: 'Rua das Flores, 123, 1000-001 Lisboa',
+        cae: '4752 - Comércio a retalho de eletrodomésticos',
+        dataConstituicao: '01/01/2010',
+        regime: 'Normal',
+        contactos: 'Tel: 211234567 | Email: empresa.a@exemplo.pt',
+        situacaoFiscal: 'Regular',
+        dividasTotais: '€0,00'
+      },
+      '987654321': {
+        name: 'Empresa B, S.A.',
+        nif: '987654321',
+        morada: 'Avenida da Liberdade, 456, 1250-002 Lisboa',
+        cae: '7022 - Serviços de consultoria',
+        dataConstituicao: '15/03/2015',
+        regime: 'Normal',
+        contactos: 'Tel: 212345678 | Email: empresa.b@exemplo.pt',
+        situacaoFiscal: 'Irregular',
+        dividasTotais: '€15.200'
+      }
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+      // Preencher campos fixos
+      document.getElementById('nifs').innerText = '123456789 vs 987654321';
+      document.getElementById('tipoCaso').innerText = 'Comparação de Contribuintes';
+      document.getElementById('data').innerText = '10/10/2025';
+      // O conteúdo de análise e insights AI já está fixo no HTML e não deve ser sobrescrito.
+    });
+
+    function backToDashboard() {
+      window.location.href = 'dashboard.html';
+    }
+  </script>
+</body>
+</html>

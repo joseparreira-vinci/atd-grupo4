@@ -1,0 +1,262 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Contribuintes — Dashboard Inspetivo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+  <style>
+    .controls{display:flex;gap:8px;align-items:center;margin-bottom:8px}
+    input[type=search],select{background:transparent;border:1px solid rgba(255,255,255,0.04);padding:8px;border-radius:8px;color:inherit}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;text-align:left;border-bottom:1px dashed rgba(255,255,255,0.02);font-size:14px}
+    th{color:var(--muted);font-weight:600}
+    tr:hover{background:linear-gradient(90deg,rgba(255,255,255,0.01),transparent);cursor:pointer}
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="topbar">
+      <div class="brand">
+        <div class="hamburger" id="hamburger" aria-label="Abrir menu" title="Menu">
+          <div class="bars"></div>
+        </div>
+        <img src="logo-at.png" alt="Logo ATD" class="logo">
+        <div>
+          <div style="font-weight:700">Painel Inspetivo — Antónia</div>
+          <div style="font-size:12px;color:var(--muted)">Contribuintes</div>
+        </div>
+      </div>
+      <select id="fiscal-year" style="padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:var(--bg);color:var(--muted);">
+        <option value="2023">Ano Fiscal 2023</option>
+        <option value="2024" selected>Ano Fiscal 2024</option>
+        <option value="2025">Ano Fiscal 2025</option>
+      </select>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="menu-title">Menu</div>
+        <button class="btn ghost close-btn" onclick="closeSidebar()" style="font-size:18px;">×</button>
+      </div>
+      <div class="menu-list">
+        <a class="menu-item" href="dashboard.html">Dashboard</a>
+        <a class="menu-item" href="contribuintes.html">Contribuintes</a>
+        <a class="menu-item" href="casos.html">Casos Fechados</a>
+        <a class="menu-item" href="relatorios.html">Relatórios</a>
+        <a class="menu-item" href="equipa.html">Equipa</a>
+        <a class="menu-item" href="gestor.html">Gestor</a>
+        <a class="menu-item" href="elearning.html">Elearning</a>
+        <a class="menu-item" href="notificacoes.html">Notificações</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>Contribuintes com irregularidades fiscais</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <button class="btn ghost" onclick="window.print()" style="margin-left:8px">Imprimir</button>
+        </div>
+      </div>
+
+      <div class="controls">
+        <input type="search" id="search" placeholder="Procurar por nome ou NIF" />
+        <select id="filter-risk"><option value="">Todos os riscos</option><option value="7-10">Alto (7-10)</option><option value="4-6">Médio (4-6)</option><option value="0-3">Baixo (0-3)</option></select>
+      </div>
+
+      <div class="card">
+        <table id="table-contribuintes">
+          <thead><tr><th>Nome / NIF</th><th>Regra</th><th>Score</th><th>Inspetor</th></tr></thead>
+            <tbody>
+              <tr onclick="suggestInspector('423456789')" style="cursor:pointer">
+                <td>Empresa C<div style="font-size:12px;color:var(--muted)">423456789</div></td>
+                <td>Diferença IVA/IRC</td>
+                <td>9</td>
+                <td><em>Não atribuído</em></td>
+              </tr>
+              <tr onclick="window.location.href='detail.html?nif=123456789'" style="cursor:pointer">
+                <td>Empresa A<div style="font-size:12px;color:var(--muted)">123456789</div></td>
+                <td>Diferença IVA/IRC</td>
+                <td>8</td>
+                <td>Antónia Ferreira</td>
+              </tr>
+              <tr onclick="window.location.href='detail.html?nif=223456789'" style="cursor:pointer">
+                <td>Empresa B<div style="font-size:12px;color:var(--muted)">223456789</div></td>
+                <td>Fornecedores inativos</td>
+                <td>5</td>
+                <td>Ana Silva</td>
+              </tr>
+              <tr onclick="window.location.href='detail.html?nif=323456789'" style="cursor:pointer">
+                <td>João Pereira<div style="font-size:12px;color:var(--muted)">323456789</div></td>
+                <td>Património vs Rendimentos</td>
+                <td>2</td>
+                <td>Antónia Ferreira</td>
+              </tr>
+
+            </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <!-- Modal para sugestão de inspetor -->
+  <div id="suggestion-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center;backdrop-filter:blur(5px);">
+    <div class="card" style="max-width:450px;width:90%;text-align:left;padding:20px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.3);animation:fadeIn 0.3s ease;">
+      <h3 style="margin-bottom:16px;text-align:center;">Sugestão de Inspetor</h3>
+      <p id="suggestion-text" style="margin-bottom:16px;">Carregando sugestão...</p>
+      <div style="margin-bottom:16px;">
+        <label for="inspector-select" style="display:block;margin-bottom:4px;font-weight:600;">Selecionar Inspetor:</label>
+        <select id="inspector-select" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:rgba(0,0,0,0.05);color:#1e293b;">
+          <!-- Options will be populated by JS -->
+        </select>
+      </div>
+      <div style="display:flex;gap:8px;justify-content:flex-end;">
+        <button class="btn ghost" onclick="closeModal()">Cancelar</button>
+        <button class="btn primary" onclick="assignInspector()">Atribuir</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // Dados estáticos dos contribuintes
+    const data = {
+      contribuintes: [
+        { name: "Empresa C", nif: "423456789", rule: "Diferença IVA/IRC", risk: 9, inspector: "" },
+        { name: "Empresa A", nif: "123456789", rule: "Diferença IVA/IRC", risk: 9, inspector: "Antónia Ferreira" },
+        { name: "Empresa B", nif: "223456789", rule: "Fornecedores inativos", risk: 5, inspector: "Ana Silva" },
+        { name: "João Pereira", nif: "323456789", rule: "Património vs Rendimentos", risk: 2, inspector: "Antónia Ferreira" },
+      ]
+    };
+
+    // Load data
+    showContribuintes();
+
+    // Sidebar hamburger
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('hamburger').addEventListener('click',()=>{
+      sidebar.classList.toggle('open');
+    });
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+    }
+
+    // Close sidebar on link click
+    document.querySelectorAll('.menu-item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        sidebar.classList.remove('open');
+      });
+    });
+
+    // Populate contributors table
+    function showContribuintes(){
+      const tbody = document.querySelector('#table-contribuintes tbody'); tbody.innerHTML='';
+      data.contribuintes.forEach(c=>{
+        const tr = document.createElement('tr');
+        const inspectorText = c.inspector || '<em>Não atribuído</em>';
+        tr.innerHTML = `<td>${c.name}<div style="font-size:12px;color:var(--muted)">${c.nif}</div></td><td>${c.rule}</td><td>${c.risk}</td><td>${inspectorText}</td>`;
+        if (c.inspector) {
+          tr.addEventListener('click',()=>openContribuinte(c.nif));
+        } else {
+          tr.addEventListener('click',()=>suggestInspector(c.nif));
+        }
+        tbody.appendChild(tr);
+      });
+    }
+
+    // Search/filter
+    document.getElementById('search').addEventListener('input',(e)=>{
+      const q = e.target.value.toLowerCase();
+      const rows = document.querySelectorAll('#table-contribuintes tbody tr');
+      rows.forEach(r=>{
+        r.style.display = r.innerText.toLowerCase().includes(q)?'table-row':'none';
+      });
+    });
+
+    document.getElementById('filter-risk').addEventListener('change',(e)=>{
+      const v = e.target.value;
+      const rows = document.querySelectorAll('#table-contribuintes tbody tr');
+      rows.forEach(r=>{
+        if(!v) r.style.display='table-row';
+        else {
+          const risk = parseInt(r.cells[2].innerText);
+          const [min, max] = v.split('-').map(Number);
+          r.style.display = (risk >= min && risk <= max) ? 'table-row':'none';
+        }
+      });
+    });
+
+    function openContribuinte(nif){
+  window.location.href = `detail.html?nif=${nif}`;
+    }
+
+    // Função para sugerir inspetor
+    let currentNif = '';
+    function suggestInspector(nif) {
+      currentNif = nif;
+      // Dados dos inspetores com especialidades (baseado em perfil_equipa.html)
+      const inspectors = [
+        { name: "Ana Silva", specialty: "análises de contribuintes de médio risco" },
+        { name: "Miguel Torres", specialty: "casos complexos" },
+        { name: "Antónia Ferreira", specialty: "auditorias detalhadas e conformidade fiscal" },
+        { name: "Carlos Mendes", specialty: "compliance e auditorias de rotina" }
+            ];
+
+      // Lógica simples de sugestão baseada na regra (hardcoded para este exemplo)
+      const rule = "Diferença IVA/IRC"; // Para nif 423456789
+      let suggestedInspector;
+      if (rule.includes("IVA") || rule.includes("IRC")) {
+        suggestedInspector = inspectors.find(i => i.specialty.includes("conformidade fiscal"));
+      } else {
+        suggestedInspector = inspectors[0]; // Default
+      }
+
+      // Populate the select
+      const select = document.getElementById('inspector-select');
+      select.innerHTML = '';
+      inspectors.forEach(ins => {
+        const option = document.createElement('option');
+        option.value = ins.name;
+        option.textContent = `${ins.name} - ${ins.specialty}`;
+        select.appendChild(option);
+      });
+      select.value = suggestedInspector.name;
+
+      document.getElementById('suggestion-text').innerText = `Para a regra "${rule}", sugerimos o inspetor ${suggestedInspector.name} (${suggestedInspector.specialty}).`;
+      document.getElementById('suggestion-modal').style.display = 'flex';
+    }
+
+    function closeModal() {
+      document.getElementById('suggestion-modal').style.display = 'none';
+    }
+
+    function assignInspector() {
+      const selectedInspector = document.getElementById('inspector-select').value;
+      // Encontrar a linha com o nif
+      const rows = document.querySelectorAll('#table-contribuintes tbody tr');
+      for (let row of rows) {
+        const nifText = row.cells[0].innerText.split('\n')[1]; // NIF está na segunda linha da célula
+        if (nifText === currentNif) {
+          // Actualizar a célula do inspetor
+          row.cells[3].innerHTML = selectedInspector;
+          // Mudar o onclick para redirecionar para detail.html
+          row.onclick = () => window.location.href = `detail.html?nif=${currentNif}`;
+          break;
+        }
+      }
+      // Atualizar os dados
+      const contribuinte = data.contribuintes.find(c => c.nif === currentNif);
+      if (contribuinte) {
+        contribuinte.inspector = selectedInspector;
+      }
+      closeModal();
+    }
+  </script>
+</body>
+</html>

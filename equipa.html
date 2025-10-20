@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Equipa — Dashboard Inspetivo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+  <style>
+    .controls {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      margin-bottom: 8px;
+    }
+
+    input[type=search],
+    select {
+      background: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      padding: 8px;
+      border-radius: 8px;
+      color: inherit;
+      font-size: 14px;
+    }
+
+    input[type=search]::placeholder {
+      color: var(--muted);
+    }
+
+    option {
+      color: inherit;
+      background: var(--card);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th,
+    td {
+      padding: 10px;
+      text-align: left;
+      border-bottom: 1px dashed rgba(255, 255, 255, 0.02);
+      font-size: 14px;
+    }
+
+    th {
+      color: var(--muted);
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background: linear-gradient(90deg, rgba(255, 255, 255, 0.01), transparent);
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="topbar">
+      <div class="brand">
+        <div class="hamburger" id="hamburger" aria-label="Abrir menu" title="Menu">
+          <div class="bars"></div>
+        </div>
+        <img src="logo-at.png" alt="Logo ATD" class="logo">
+        <div>
+          <div style="font-weight:700">Painel Inspetivo — Antónia</div>
+          <div style="font-size:12px;color:var(--muted)">Equipa</div>
+        </div>
+      </div>
+      <select id="fiscal-year" style="padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:var(--bg);color:var(--muted);">
+        <option value="2023">Ano Fiscal 2023</option>
+        <option value="2024">Ano Fiscal 2024</option>
+        <option value="2025" selected>Ano Fiscal 2025</option>
+      </select>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="menu-title">Menu</div>
+        <button class="btn ghost close-btn" onclick="closeSidebar()" style="font-size:18px;">×</button>
+      </div>
+      <div class="menu-list">
+        <a class="menu-item" href="dashboard.html">Dashboard</a>
+        <a class="menu-item" href="contribuintes.html">Contribuintes</a>
+        <a class="menu-item" href="casos.html">Casos Fechados</a>
+        <a class="menu-item" href="relatorios.html">Relatórios</a>
+        <a class="menu-item" href="equipa.html">Equipa</a>
+        <a class="menu-item" href="gestor.html">Gestor</a>
+        <a class="menu-item" href="elearning.html">Elearning</a>
+        <a class="menu-item" href="notificacoes.html">Notificações</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>Membros da Equipa</h2>
+        <div style="display:flex;gap:8px;align-items:center">
+          <div style="color:var(--muted);font-size:13px">Ordenar / Filtrar</div>
+          <button class="btn ghost" onclick="window.print()" style="margin-left:8px">Imprimir</button>
+        </div>
+      </div>
+
+      <div class="controls">
+        <input type="search" id="search" placeholder="Procurar por nome" />
+        <select id="filter-status">
+          <option value="">Todos os status</option>
+          <option value="Ativa">Ativa</option>
+          <option value="Sobrecarregada">Sobrecarregada</option>
+        </select>
+      </div>
+
+      <div class="card">
+        <table id="table-equipa">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th>Casos</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr onclick="window.location.href='perfil_equipa.html?name=Ana%20Silva'">
+              <td>Ana Silva</td>
+              <td>3</td>
+              <td>Ativa</td>
+            </tr>
+            <tr onclick="window.location.href='perfil_equipa.html?name=Miguel%20Torres'">
+              <td>Miguel Torres</td>
+              <td>8</td>
+              <td>Sobrecarregada</td>
+            </tr>
+            <tr onclick="window.location.href='perfil_equipa.html?name=Ant%C3%B3nia%20Ferreira'">
+              <td>Antónia Ferreira</td>
+              <td>5</td>
+              <td>Ativa</td>
+            </tr>
+            <tr onclick="window.location.href='perfil_equipa.html?name=Carlos%20Mendes'">
+              <td>Carlos Mendes</td>
+              <td>4</td>
+              <td>Ativa</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Sidebar toggle
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('hamburger').addEventListener('click', () => {
+      sidebar.classList.toggle('open');
+    });
+    function closeSidebar() { sidebar.classList.remove('open'); }
+    document.querySelectorAll('.menu-item').forEach(el => {
+      el.addEventListener('click', () => sidebar.classList.remove('open'));
+    });
+
+    // Search and filter
+    const searchInput = document.getElementById('search');
+    const filterSelect = document.getElementById('filter-status');
+    const rows = document.querySelectorAll('#table-equipa tbody tr');
+
+    searchInput.addEventListener('input', () => {
+      const q = searchInput.value.toLowerCase();
+      rows.forEach(r => {
+        r.style.display = r.innerText.toLowerCase().includes(q) ? 'table-row' : 'none';
+      });
+    });
+
+    filterSelect.addEventListener('change', () => {
+      const v = filterSelect.value;
+      rows.forEach(r => {
+        const status = r.cells[2].innerText;
+        r.style.display = (!v || status === v) ? 'table-row' : 'none';
+      });
+    });
+  </script>
+</body>
+</html>

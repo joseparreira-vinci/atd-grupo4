@@ -1,0 +1,515 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Detalhes do Contribuinte — Dashboard Inspetivo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+  <style>
+    .detail{display:flex;gap:12px}
+    .detail-left{width:360px}
+    .tabs{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+    .tab{padding:8px 10px;border-radius:8px;background:rgba(255,255,255,0.02);cursor:pointer}
+    .tab.active{background:linear-gradient(90deg,var(--accent),#7c3aed);color:#021427}
+    .evidence{margin-top:8px}
+    .evi-item{padding:10px;border-radius:8px;margin-bottom:8px;background:rgba(255,255,255,0.01)}
+    .source{font-size:12px;color:var(--muted)}
+
+    .ai-analysis{background:linear-gradient(180deg,rgba(96,165,250,0.06),transparent);padding:12px;border-radius:10px;margin-top:12px}
+    .actions{display:flex;gap:8px;margin-top:12px}
+
+    /* Table styles */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 12px 0;
+      font-size: 14px;
+      background: rgba(255,255,255,0.05);
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    table thead {
+      background: linear-gradient(90deg, var(--accent), #7c3aed);
+      color: #021427;
+      font-weight: 600;
+    }
+    table th, table td {
+      padding: 12px 8px;
+      text-align: left;
+      border-bottom: 1px solid rgba(255,255,255,0.1);
+    }
+    table tbody tr:nth-child(even) {
+      background: rgba(255,255,255,0.02);
+    }
+    table tbody tr:hover {
+      background: rgba(96,165,250,0.1);
+      transition: background 0.2s;
+    }
+    table tbody tr.highlight {
+      background: rgba(255,231,230,0.5);
+    }
+    table tbody tr.total {
+      background: rgba(96,165,250,0.1);
+      font-weight: bold;
+    }
+
+    .irregularidade {
+      color: #e53e3e;
+      font-weight: bold;
+      background: rgba(229, 62, 62, 0.1);
+      padding: 2px 4px;
+      border-radius: 3px;
+    }
+
+    /* responsive */
+    @media (max-width:980px){
+      .detail{flex-direction:column}
+      .detail-left{width:100%}
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    /* Chatbot styles */
+    .chatbot-btn {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 60px;
+      height: 60px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      border: none;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 24px;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+      z-index: 1000;
+      transition: all 0.3s ease;
+    }
+    .chatbot-btn:hover {
+      transform: scale(1.1);
+      box-shadow: 0 6px 20px rgba(0,0,0,0.2);
+    }
+
+    .chat-modal {
+      position: fixed;
+      bottom: 90px;
+      right: 20px;
+      width: 350px;
+      height: 500px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.2);
+      display: none;
+      flex-direction: column;
+      z-index: 1001;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .chat-header {
+      background: linear-gradient(135deg, var(--accent), #7c3aed);
+      color: white;
+      padding: 16px;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .chat-messages {
+      flex: 1;
+      padding: 16px;
+      overflow-y: auto;
+      background: #f8fafc;
+    }
+
+    .chat-input-area {
+      padding: 16px;
+      border-top: 1px solid #e2e8f0;
+      background: white;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .chat-input {
+      width: 100%;
+      padding: 12px;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      resize: none;
+      font-family: inherit;
+    }
+
+    .suggestion-btn {
+      display: block;
+      width: 100%;
+      padding: 8px 12px;
+      margin: 4px 0;
+      background: #f1f5f9;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      cursor: pointer;
+      text-align: left;
+      font-size: 14px;
+      transition: background 0.2s;
+    }
+    .suggestion-btn:hover {
+      background: #e2e8f0;
+    }
+
+    .close-chat {
+      background: none;
+      border: none;
+      color: white;
+      font-size: 20px;
+      cursor: pointer;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="topbar">
+      <div class="brand">
+        <div class="hamburger" id="hamburger" aria-label="Abrir menu" title="Menu">
+          <div class="bars"></div>
+        </div>
+        <img src="logo-at.png" alt="Logo ATD" class="logo">
+        <div>
+          <div style="font-weight:700">Painel Inspetivo — Antónia</div>
+          <div style="font-size:12px;color:var(--muted)">Detalhes do Contribuinte</div>
+        </div>
+      </div>
+      <select id="fiscal-year" style="padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:var(--bg);color:var(--muted);">
+        <option value="2023">Ano Fiscal 2023</option>
+        <option value="2024">Ano Fiscal 2024</option>
+        <option value="2025" selected>Ano Fiscal 2025</option>
+      </select>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="menu-title">Menu</div>
+        <button class="btn ghost close-btn" onclick="closeSidebar()" style="font-size:18px;">×</button>
+      </div>
+      <div class="menu-list">
+        <a class="menu-item" href="dashboard.html">Dashboard</a>
+        <a class="menu-item" href="contribuintes.html">Contribuintes</a>
+        <a class="menu-item" href="casos.html">Casos Fechados</a>
+        <a class="menu-item" href="relatorios.html">Relatórios</a>
+        <a class="menu-item" href="equipa.html">Equipa</a>
+        <a class="menu-item" href="gestor.html">Gestor</a>
+        <a class="menu-item" href="elearning.html">Elearning</a>
+        <a class="menu-item" href="notificacoes.html">Notificações</a>
+      </div>
+    </aside>
+
+    <main class="main">
+
+
+
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div>
+          <h2 id="detail-name">Contribuinte</h2>
+          <div style="margin-top:8px;display:flex;gap:8px">
+            <input type="text" id="compare-nif" placeholder="NIF para comparar" onkeypress="if(event.key==='Enter') compare()" style="padding:4px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#1e293b">
+            <button class="btn primary" onclick="compare()">Comparar</button>
+          </div>
+        </div>
+        <div>
+          <button class="btn ghost" onclick="openRequestModal()">Solicitar Dados</button>
+          <button class="btn ghost" onclick="goToFinal()">Finalizar</button>
+          <button class="btn ghost" onclick="backToContrib()">Voltar</button>
+        </div>
+      </div>
+
+      <div class="card ai-analysis">
+        <h3>Análise Inteligente do Contribuinte</h3>
+        <div style="margin-bottom:12px">
+          <label for="analysis-type">Tipo de Análise:</label>
+          <select id="analysis-type" style="margin-left:8px;padding:4px;border-radius:4px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#1e293b">
+            <option value="geral">Geral</option>
+            <option value="financeira">Financeira</option>
+            <option value="patrimonial">Patrimonial</option>
+            <option value="risco">Risco de Fraude</option>
+          </select>
+        </div>
+        <div id="analysis-content">
+        <p><strong>Irregularidades Detetadas:</strong></p>
+        <ul>
+          <li><strong>IVA (2025-T2):</strong> Vendas declaradas de €135.000 com compras de apenas €90.000, resultando em um saldo de IVA a pagar de €10.350. Esta discrepância sugere possível subdeclaração de custos operacionais, atividade económica não declarada ou manipulação de faturas para reduzir a base tributável. Comparado com trimestres anteriores, o aumento súbito em vendas sem correspondência proporcional em compras indica risco de evasão através de circuitos paralelos.</li>
+          <li><strong>IRS (2024):</strong> Rendimentos de capital declarados em €4.500 na declaração anual, mas a MOD40 trimestral acumula €5.000 em rendimentos financeiros totais. Esta inconsistência de €500 aponta para possível omissão intencional de rendimentos, talvez dividendos não declarados ou juros de contas não reportadas. A diferença pode representar evasão fiscal deliberada, impactando a tributação progressiva do IRS.</li>
+          <li><strong>Património:</strong> Imóvel residencial em Lisboa avaliado fiscalmente em €250.000, enquanto o valor médio de mercado na zona é €350.000 (baseado em transações recentes similares). Esta subavaliação de €100.000 permite redução artificial do IMI devido, potencialmente configurando crime de omissão de rendimentos ou fraude fiscal. Além disso, o imóvel apresenta rendas declaradas abaixo do mercado, sugerindo possível utilização para lavagem de capitais.</li>
+          <li><strong>E-Fatura:</strong> Análise das faturas emitidas revela padrões de transações com fornecedores de baixo risco fiscal, possivelmente utilizados como "testas de ferro" para ocultar fluxos financeiros. Há indícios de triangulações intracomunitárias com países de baixa tributação.</li>
+        </ul>
+        <p><strong>Recomendações:</strong> Recomenda-se investigação aprofundada das transações de IVA no trimestre T2, incluindo auditoria de faturas e cruzamento com dados bancários para identificar custos omitidos. Cruzar urgentemente os dados da declaração IRS com os registos MOD40 para quantificar a omissão e aplicar correções retroativas. Atualizar a avaliação patrimonial do imóvel em Lisboa através de perícia independente, potencialmente resultando em cobrança adicional de IMI e penalidades. Risco elevado de evasão fiscal sistemática, justificando ação inspetiva prioritária.</p>
+        <p><strong>Entidades Relacionadas a Investigar:</strong></p>
+        <ul>
+          <li><strong>NIF 987654321:</strong> Identificado como entidade conectada a transações suspeitas, possivelmente envolvida em redes de evasão fiscal. Recomenda-se análise imediata dos seus registos fiscais e conexões com o contribuinte atual.</li>
+        </ul>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="tabs" id="tabs">
+          <div class="tab" data-tab="certidao">Certidão Permanente</div>
+          <div class="tab" data-tab="cadastro">Sistema Cadastral</div>
+          <div class="tab" data-tab="irs">IRS</div>
+          <div class="tab" data-tab="irc">IRC</div>
+          <div class="tab" data-tab="iva">IVA</div>
+          <div class="tab" data-tab="patrimonio">Património</div>
+          <div class="tab" data-tab="dividas">Dívidas Fiscais</div>
+          <div class="tab" data-tab="efatura">E-Fatura</div>
+          <div class="tab" data-tab="acessorias">Declarações Acessórias</div>
+          <div class="tab" data-tab="vies">VIES</div>
+          <div class="tab" data-tab="mod40">MOD40</div>
+          <div class="tab" data-tab="dmr">DMR</div>
+        </div>
+      </div>
+      <div id="modulos-info"></div>
+    </main>
+  </div>
+
+  <!-- Modal para solicitar dados -->
+  <div id="request-modal" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);z-index:1000;justify-content:center;align-items:center;backdrop-filter:blur(5px);">
+    <div class="card" style="max-width:450px;width:90%;text-align:left;padding:20px;border-radius:12px;box-shadow:0 10px 30px rgba(0,0,0,0.3);animation:fadeIn 0.3s ease;">
+      <h3 style="margin-bottom:16px;text-align:center;">Solicitar Mais Dados</h3>
+      <form id="request-form">
+        <div style="margin-bottom:12px;">
+          <label for="doc-type" style="display:block;margin-bottom:4px;font-weight:600;">Tipo de Documento:</label>
+          <select id="doc-type" style="width:100%;padding:8px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:rgba(0,0,0,0.05);color:#1e293b;">
+            <option value="faturas">Faturas Adicionais</option>
+            <option value="extratos">Extratos Bancários</option>
+            <option value="declaracoes">Declarações Acessórias</option>
+            <option value="outros">Outros</option>
+          </select>
+        </div>
+        <div style="margin-bottom:16px;">
+          <label for="reason" style="display:block;margin-bottom:4px;font-weight:600;">Motivo:</label>
+          <textarea id="reason" rows="4" style="width:100%;background:rgba(0,0,0,0.05);border:1px solid rgba(0,0,0,0.1);border-radius:6px;padding:8px;color:#1e293b;resize:vertical;" placeholder="Explique o motivo da solicitação..."></textarea>
+        </div>
+        <div style="display:flex;gap:8px;justify-content:flex-end;">
+          <button type="button" class="btn ghost" onclick="closeRequestModal()">Cancelar</button>
+          <button type="button" class="btn primary" onclick="submitRequest()">Enviar Solicitação</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // Sidebar hamburger
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('hamburger').addEventListener('click',()=>{
+      sidebar.classList.toggle('open');
+    });
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+    }
+
+    // Close sidebar on link click
+    document.querySelectorAll('.menu-item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        sidebar.classList.remove('open');
+      });
+    });
+
+    // Conteúdo de cada módulo
+    const modulos = {
+      certidao: '<h4>Certidão Permanente</h4><p>Documento oficial que comprova a situação fiscal atual do contribuinte perante a Autoridade Tributária.</p><ul><li><strong>Situação Fiscal:</strong> Regular (sem dívidas pendentes)</li><li><strong>Dívidas Fiscais Totais:</strong> €0,00</li><li><strong>Última Atualização:</strong> 01/10/2025</li><li><strong>Certificado de Não Dívida:</strong> Emitido em 15/09/2025 (válido por 6 meses)</li><li><strong>Declarações Pendentes:</strong> Nenhuma</li></ul><p><em>Análise:</em> Contribuinte em situação regular, sem impedimentos fiscais.</p><br><button class="btn primary" onclick="downloadModule(\'certidao\')">Download Ficheiro Certidão</button>',
+      cadastro: '<h4>Sistema Cadastral</h4><p>Registo completo dos dados identificativos e fiscais do contribuinte no sistema da AT.</p><ul><li><strong>Nome/Razão Social:</strong> Empresa A, Lda.</li><li><strong>NIF:</strong> 123456789</li><li><strong>Morada Fiscal:</strong> Rua das Flores, 123, 1000-001 Lisboa</li><li><strong>CAE (Atividade):</strong> 4752 - Comércio a retalho de eletrodomésticos</li><li><strong>Data de Constituição:</strong> 01/01/2010</li><li><strong>Estado Atual:</strong> Ativo</li><li><strong>Regime Fiscal:</strong> Normal</li><li><strong>Contactos:</strong> Tel: 211234567 | Email: empresa.a@exemplo.pt</li></ul><p><em>Análise:</em> Dados atualizados, sem alterações pendentes.</p><br><button class="btn primary" onclick="downloadModule(\'cadastro\')">Download Ficheiro Cadastro</button>',
+      irs: '<h4>IRS - Imposto sobre o Rendimento das Pessoas Singulares</h4><p>Declaração anual de rendimentos pessoais. Taxas progressivas aplicáveis.</p><h5>Última Declaração (Ano 2024)</h5><table><thead><tr><th>Fonte de Rendimento</th><th>Valor Bruto (€)</th><th>Deduções (€)</th><th>Valor Líquido (€)</th><th>Taxa (%)</th><th>Imposto (€)</th></tr></thead><tbody><tr><td>Trabalho Dependente</td><td>28.000</td><td>4.000</td><td>24.000</td><td>20</td><td>4.800</td></tr><tr class="highlight"><td>Rendimentos de Capital</td><td>4.500</td><td>0</td><td>4.500</td><td>10</td><td>450</td></tr><tr><td>Rendas de Imóveis</td><td>12.000</td><td>2.000</td><td>10.000</td><td>15</td><td>1.500</td></tr><tr><td>Pensões</td><td>8.000</td><td>1.500</td><td>6.500</td><td>10</td><td>650</td></tr><tr><td>Outros Rendimentos</td><td>2.000</td><td>500</td><td>1.500</td><td>15</td><td>225</td></tr><tr class="total"><td>Total</td><td>54.500</td><td>8.000</td><td>46.500</td><td>-</td><td>7.625</td></tr></tbody></table><h5>Métricas IRS</h5><ul><li><strong>Rendimento Bruto Total (IRS):</strong> €54.500</li><li><strong>Imposto Total Pago (IRS):</strong> €7.625</li></ul><p><strong>Estado da Declaração:</strong> Apresentada em 31/05/2025 | Processada | Reembolso de €1.200 solicitado</p><p><em>Análise:</em> A declaração apresenta rendimentos diversificados, com predominância de trabalho dependente (51% do total), seguido de rendas imobiliárias e pensões. As deduções aplicadas (€8.000) estão dentro dos limites legais, otimizando a carga fiscal. <span class="irregularidade">No entanto, os rendimentos de capital declarados em €4.500 contrastam com o total acumulado na MOD40 de €5.000, indicando uma omissão de €500.</span> Esta discrepância pode representar rendimentos não declarados, como dividendos ocultos ou juros de contas não reportadas, impactando a tributação progressiva e potencialmente configurando evasão fiscal. Recomenda-se cruzamento imediato com registos MOD40, investigação de fontes de capital e aplicação de correções retroativas, incluindo juros e penalidades. O reembolso solicitado deve ser suspenso até esclarecimento.</p><br><button class="btn primary" onclick="downloadModule(\'irs\')">Download Ficheiro IRS</button>',
+      irc: '<h4>IRC - Imposto sobre o Rendimento das Pessoas Coletivas</h4><p>Declaração anual para empresas. Taxa normal de 21%.</p><h5>Última Declaração (Ano 2024)</h5><table><thead><tr><th>Item</th><th>Valor (€)</th></tr></thead><tbody><tr><td>Receitas Totais</td><td>250.000</td></tr><tr><td>Custos e Deduções</td><td>180.000</td></tr><tr><td>Lucro Antes de Impostos</td><td>70.000</td></tr><tr><td>Benefícios Fiscais (I&D)</td><td>-7.000</td></tr><tr><td>Lucro Tributável</td><td>63.000</td></tr><tr><td>Taxa Aplicada</td><td>21%</td></tr><tr class="total"><td>Imposto Devido</td><td>13.230</td></tr></tbody></table><h5>Métricas IRC</h5><ul><li><strong>Receitas Totais (IRC):</strong> €250.000</li><li><strong>Lucro Tributável (IRC):</strong> €63.000</li><li><strong>Imposto IRC Devido:</strong> €13.230</li></ul><p><strong>Estado:</strong> Apresentada em 15/06/2025 | Paga em 30/06/2025</p><p><em>Análise:</em> Empresa rentável com investimentos em inovação. Sugere manutenção de benefícios fiscais.</p><br><button class="btn primary" onclick="downloadModule(\'irc\')">Download Ficheiro IRC</button>',
+      iva: '<h4>IVA - Imposto sobre o Valor Acrescentado</h4><p>Imposto sobre consumo. Declarações trimestrais obrigatórias.</p><h5>Declarações Recentes</h5><table><thead><tr><th>Período</th><th>Vendas (€)</th><th>Compras (€)</th><th>IVA Devido (€)</th><th>IVA Dedicado (€)</th><th>Saldo (€)</th><th>Estado</th></tr></thead><tbody><tr><td>2025-T1</td><td>120.000</td><td>80.000</td><td>27.600</td><td>18.400</td><td>9.200</td><td style="color:green;">Pago</td></tr><tr class="highlight"><td>2025-T2</td><td>135.000</td><td>90.000</td><td>31.050</td><td>20.700</td><td>10.350</td><td style="color:green;">Pago</td></tr><tr><td>2025-T3</td><td>110.000</td><td>75.000</td><td>25.300</td><td>17.250</td><td>8.050</td><td style="color:red;">Pendente</td></tr></tbody></table><h5>Métricas IVA</h5><ul><li><strong>Vendas (IVA 2025-T2):</strong> €135.000</li><li><strong>Compras (IVA 2025-T2):</strong> €90.000</li><li><strong>Saldo IVA a Pagar (T2):</strong> €10.350</li></ul><p><strong>Taxa Normal:</strong> 23% | <strong>Faturação Eletrónica:</strong> Ativa | <strong>Última Comunicação:</strong> 05/10/2025</p><p><em>Análise:</em> O fluxo de IVA apresenta regularidade nos trimestres T1 e T3, com saldos proporcionais às operações. <span class="irregularidade">No entanto, o T2 destaca-se por vendas de €135.000 contra compras de apenas €90.000, resultando em um saldo de IVA a pagar de €10.350, superior aos trimestres adjacentes.</span> Esta discrepância sugere possível subdeclaração de custos, atividade económica não declarada ou utilização de faturas falsas para reduzir a base tributável. Comparado com o histórico, o aumento súbito em vendas sem correspondência em compras indica risco de evasão através de circuitos paralelos ou triangulações. Recomenda-se auditoria detalhada das faturas do T2, cruzamento com extratos bancários e verificação de fornecedores. O período T3 pendente deve ser regularizado urgentemente para evitar juros de mora e penalidades adicionais.</p><br><button class="btn primary" onclick="downloadModule(\'iva\')">Download Ficheiro IVA</button>',
+      patrimonio: '<h4>Património</h4><p>Impostos sobre bens imóveis, móveis e rendimentos patrimoniais.</p><h5>Imóveis (IMI)</h5><table><thead><tr><th>Descrição</th><th>Valor Patrimonial (€)</th><th>Taxa (%)</th><th>IMI (€)</th><th>Estado</th></tr></thead><tbody><tr class="highlight"><td>Apartamento T3 Lisboa</td><td>250.000</td><td>0.4</td><td>1.000</td><td style="color:green;">Pago</td></tr><tr><td>Armazém Industrial Porto</td><td>180.000</td><td>0.35</td><td>630</td><td style="color:green;">Pago</td></tr><tr><td>Loja Centro Histórico</td><td>300.000</td><td>0.45</td><td>1.350</td><td style="color:red;">Pendente</td></tr><tr><td>Casa de Férias Algarve</td><td>200.000</td><td>0.3</td><td>600</td><td style="color:green;">Pago</td></tr><tr><td>Escritório Centro</td><td>150.000</td><td>0.4</td><td>600</td><td style="color:red;">Pendente</td></tr></tbody></table><h5>Veículos (IUC)</h5><table><thead><tr><th>Propriedade</th><th>Valor</th></tr></thead><tbody><tr><th>Veículo</th><td>BMW X3 2.0</td></tr><tr><th>Cilindrada</th><td>1995cc</td></tr><tr><th>Emissões CO2</th><td>150g/km</td></tr><tr><th>IUC Anual</th><td>€180</td></tr><tr><th>Estado</th><td style="color:green;">Pago</td></tr></tbody></table><h5>Rendas</h5><p>Rendimentos anuais: €18.000 | Taxa IRS: 15% | Imposto: €2.700</p><h5>Métricas Património</h5><ul><li><strong>Imóveis Declarados:</strong> 5</li><li><strong>Valor Patrimonial Total:</strong> €1.080.000</li><li><strong>IMI Total (Ano):</strong> €4.180</li><li><strong>Rendas Anuais Declaradas:</strong> €18.000</li></ul><p><em>Análise:</em> O património apresenta diversificação entre imóveis urbanos, industriais e de lazer, além de veículos de gama alta. <span class="irregularidade">O apartamento em Lisboa, avaliado em €250.000, está significativamente subavaliado em comparação com o valor de mercado estimado em €350.000, permitindo redução artificial do IMI em €400 anuais. Esta discrepância pode indicar tentativa de evasão fiscal através de subavaliação intencional, potencialmente configurando crime de omissão de rendimentos.</span> As rendas declaradas (€18.000 anuais) estão abaixo do mercado para imóveis similares, sugerindo possível utilização para lavagem de capitais ou ocultação de fluxos financeiros. Recomenda-se perícia independente para reavaliação dos imóveis, cruzamento com transações imobiliárias recentes e investigação de rendas efetivamente recebidas. O IMI pendente da loja e escritório deve ser regularizado para evitar execuções.</p><br><button class="btn primary" onclick="downloadModule(\'patrimonio\')">Download Ficheiro Património</button>',
+      dividas: '<h4>Dívidas Fiscais</h4><p>Resumo das obrigações fiscais pendentes.</p><ul><li><strong>Total Dívida:</strong> €7.850</li><li><strong>IVA 2025-T3:</strong> €8.050 (vencimento 15/11/2025)</li><li><strong>IMI 2025:</strong> €1.350 (vencimento 31/10/2025)</li><li><strong>Juros de Mora:</strong> €450 (acumulados)</li></ul><h5>Métricas Dívidas</h5><ul><li><strong>Dívida Fiscal Total:</strong> €7.850</li></ul><p><strong>Plano de Pagamento:</strong> Solicitado - 12 prestações mensais de €654</p><p><em>Análise:</em> Dívidas controláveis. Plano de pagamento recomendado para evitar execuções fiscais.</p><br><button class="btn primary" onclick="downloadModule(\'dividas\')">Download Ficheiro Dívidas</button>',
+      efatura: '<h4>E-Fatura</h4><p>Sistema obrigatório de comunicação de faturas à AT.</p><ul><li><strong>Estado do Sistema:</strong> Ativo e Validado</li><li><strong>Faturas Emitidas (2025):</strong> 1.450</li><li><strong>Valor Total Faturado:</strong> €380.000</li><li><strong>Última Comunicação:</strong> 08/10/2025</li><li><strong>Erros Detetados:</strong> 2 (corrigidos)</li><li><strong>Certificação:</strong> Nível Ouro</li></ul><h5>Métricas E-Fatura</h5><ul><li><strong>Faturas Emitidas (2025):</strong> 1.450</li><li><strong>Valor Total Faturado (E-Fatura):</strong> €380.000</li></ul><p><em>Análise:</em> O sistema E-Fatura está plenamente operacional, com 1.450 faturas emitidas totalizando €380.000 em 2025, indicando atividade comercial intensa. A certificação Nível Ouro confirma conformidade técnica. <span class="irregularidade">No entanto, análise dos padrões de faturação revela transações frequentes com fornecedores classificados como de baixo risco fiscal, possivelmente utilizados como "testas de ferro" para ocultar fluxos financeiros reais.</span> Os 2 erros detetados e corrigidos podem indicar tentativas de manipulação inicial. Recomenda-se análise detalhada dos destinatários das faturas, cruzamento com cadastros fiscais e verificação de autenticidade das operações para identificar possíveis triangulações ou emissões fraudulentas. Manter o sistema atualizado é essencial para prevenir fraudes futuras.</p><br><button class="btn primary" onclick="downloadModule(\'efatura\')">Download Ficheiro E-Fatura</button>',
+      acessorias: '<h4>Declarações Acessórias</h4><p>Documentos complementares às declarações principais.</p><ul><li><strong>Anexo A (IRS):</strong> Rendimentos de Capital - Apresentado</li><li><strong>Anexo B (IRC):</strong> Deduções Especiais - Apresentado</li><li><strong>Anexo C:</strong> Benefícios Fiscais - Apresentado</li><li><strong>Quadro 10 (IVA):</strong> Operações Intracomunitárias - Apresentado</li><li><strong>Data Apresentação:</strong> 31/05/2025</li><li><strong>Estado:</strong> Validados pela AT</li></ul><p><em>Análise:</em> Documentação completa. Sem pendências.</p><br><button class="btn primary" onclick="downloadModule(\'acessorias\')">Download Ficheiro Acessórias</button>',
+      vies: '<h4>VIES - Sistema de Informação sobre o IVA na UE</h4><p>Verificação de NIFs para transações intracomunitárias.</p><ul><li><strong>NIF Intracomunitário:</strong> PT123456789</li><li><strong>Estado de Validação:</strong> Válido</li><li><strong>Última Verificação:</strong> 01/10/2025</li><li><strong>Transações Intra-UE (2025):</strong> €65.000</li><li><strong>Países Parceiros:</strong> Espanha, França, Alemanha</li><li><strong>Certificado VIES:</strong> Emitido</li></ul><p><em>Análise:</em> Ativo para comércio europeu. Verificar periodicamente.</p><br><button class="btn primary" onclick="downloadModule(\'vies\')">Download Ficheiro VIES</button>',
+      mod40: '<h4>MOD40 - Declaração de Rendimentos de Capitais</h4><p>Declaração trimestral de rendimentos financeiros.</p><h5>Rendimentos Declarados (2025)</h5><table><thead><tr><th>Tipo</th><th>Valor Bruto (€)</th><th>Retenção na Fonte (€)</th><th>Valor Líquido (€)</th></tr></thead><tbody><tr><td>Juros Depósitos</td><td>1.200</td><td>120</td><td>1.080</td></tr><tr><td>Dividendos Ações</td><td>3.000</td><td>300</td><td>2.700</td></tr><tr><td>Rendimentos Fundos</td><td>800</td><td>80</td><td>720</td></tr><tr class="total"><td>Total</td><td>5.000</td><td>500</td><td>4.500</td></tr></tbody></table><p><strong>Estado:</strong> Apresentada em 31/07/2025 | Processada</p><p><em>Análise:</em> A MOD40 acumula €5.000 em rendimentos de capitais para 2025, distribuídos entre juros de depósitos, dividendos de ações e rendimentos de fundos. Esta declaração trimestral serve como base para a declaração anual de IRS, onde apenas €4.500 foram reportados, indicando uma discrepância de €500. <span class="irregularidade">Possíveis causas incluem omissão de rendimentos adicionais, como juros de contas não declaradas ou dividendos de participações ocultas.</span> A retenção na fonte total de €500 está correta para os valores declarados, mas a inconsistência com o IRS sugere necessidade de investigação para identificar fontes não reportadas. Recomenda-se auditoria dos extratos bancários e declarações de terceiros para esclarecer a origem dos €500 em falta, potencialmente levando a correções fiscais e penalidades por evasão.</p><br><button class="btn primary" onclick="downloadModule(\'mod40\')">Download Ficheiro MOD40</button>',
+      dmr: '<h4>DMR - Declaração Mensal de Remunerações</h4><p>Relatório mensal de salários e retenções para empregadores.</p><h5>Última Declaração (Outubro 2025)</h5><table><thead><tr><th>Funcionário</th><th>Salário Bruto (€)</th><th>Retenção IRS (€)</th><th>TSU (€)</th><th>Segurança Social (€)</th></tr></thead><tbody><tr><td>João Silva</td><td>2.200</td><td>330</td><td>242</td><td>304</td></tr><tr><td>Maria Santos</td><td>1.900</td><td>285</td><td>209</td><td>262</td></tr><tr><td>Carlos Pereira</td><td>1.600</td><td>240</td><td>176</td><td>221</td></tr><tr><td>Ana Costa</td><td>2.500</td><td>375</td><td>275</td><td>345</td></tr><tr><td>Pedro Lima</td><td>1.800</td><td>270</td><td>198</td><td>248</td></tr><tr class="total"><td>Total</td><td>10.000</td><td>1.500</td><td>1.100</td><td>1.380</td></tr></tbody></table><h5>Métricas DMR</h5><ul><li><strong>Funcionários (DMR):</strong> 5</li><li><strong>Salário Bruto Total (DMR):</strong> €10.000</li></ul><p><strong>Número de Funcionários:</strong> 5 | <strong>Estado:</strong> Apresentada em 10/10/2025</p><p><em>Análise:</em> Conformidade salarial com salários variados. Verificar atualizações salariais para 2026 e possíveis benefícios fiscais para empregadores.</p><br><button class="btn primary" onclick="downloadModule(\'dmr\')">Download Ficheiro DMR</button>'
+    };
+
+    // Estado dos módulos abertos
+    const modulosAbertos = {};
+
+    document.getElementById('tabs').addEventListener('click', (e) => {
+      const tab = e.target.closest('.tab');
+      if (!tab) return;
+      const tabId = tab.getAttribute('data-tab');
+      if (!modulos[tabId]) return;
+      tab.classList.toggle('active');
+      modulosAbertos[tabId] = !modulosAbertos[tabId];
+      renderModulosInfo();
+    });
+
+    function renderModulosInfo() {
+      const container = document.getElementById('modulos-info');
+      container.innerHTML = '';
+      Object.keys(modulos).forEach(key => {
+        if (modulosAbertos[key]) {
+          const div = document.createElement('div');
+          div.className = 'card';
+          div.innerHTML = modulos[key];
+          container.appendChild(div);
+        }
+      });
+    }
+
+    // Preencher nome e NIF do contribuinte a partir do URL
+    const urlParams = new URLSearchParams(window.location.search);
+    const nif = urlParams.get('nif');
+    if (nif) {
+      document.getElementById('detail-name').innerText = 'Contribuinte ' + nif;
+      document.getElementById('detail-nif').innerText = 'NIF: ' + nif;
+    }
+
+    // Análises por tipo
+    const analyses = {
+      geral: '<p><strong>Irregularidades Detetadas:</strong></p><ul><li><strong>IVA (2025-T2):</strong> Vendas declaradas de €135.000 com compras de apenas €90.000, resultando em um saldo de IVA a pagar de €10.350. Esta discrepância sugere possível subdeclaração de custos operacionais, atividade económica não declarada ou manipulação de faturas para reduzir a base tributável. Comparado com trimestres anteriores, o aumento súbito em vendas sem correspondência proporcional em compras indica risco de evasão através de circuitos paralelos.</li><li><strong>IRS (2024):</strong> Rendimentos de capital declarados em €4.500 na declaração anual, mas a MOD40 trimestral acumula €5.000 em rendimentos financeiros totais. Esta inconsistência de €500 aponta para possível omissão intencional de rendimentos, talvez dividendos não declarados ou juros de contas não reportadas. A diferença pode representar evasão fiscal deliberada, impactando a tributação progressiva do IRS.</li><li><strong>Património:</strong> Imóvel residencial em Lisboa avaliado fiscalmente em €250.000, enquanto o valor médio de mercado na zona é €350.000 (baseado em transações recentes similares). Esta subavaliação de €100.000 permite redução artificial do IMI devido, potencialmente configurando crime de omissão de rendimentos ou fraude fiscal. Além disso, o imóvel apresenta rendas declaradas abaixo do mercado, sugerindo possível utilização para lavagem de capitais.</li><li><strong>E-Fatura e Transações:</strong> Análise das faturas emitidas revela padrões de transações com fornecedores de baixo risco fiscal, possivelmente utilizados como "testas de ferro" para ocultar fluxos financeiros. Há indícios de triangulações intracomunitárias com países de baixa tributação.</li></ul><p><strong>Recomendações:</strong> Recomenda-se investigação aprofundada das transações de IVA no trimestre T2, incluindo auditoria de faturas e cruzamento com dados bancários para identificar custos omitidos. Cruzar urgentemente os dados da declaração IRS com os registos MOD40 para quantificar a omissão e aplicar correções retroativas. Atualizar a avaliação patrimonial do imóvel em Lisboa através de perícia independente, potencialmente resultando em cobrança adicional de IMI e penalidades. Risco elevado de evasão fiscal sistemática, justificando ação inspetiva prioritária.</p><p><strong>Entidades Relacionadas a Investigar:</strong></p><ul><li><strong>NIF 987654321:</strong> Identificado como entidade conectada a transações suspeitas, possivelmente envolvida em redes de evasão fiscal. Recomenda-se análise imediata dos seus registos fiscais e conexões com o contribuinte atual.</li></ul>',
+      financeira: '<p><strong>Análise Financeira:</strong> Foco em fluxos de caixa e declarações fiscais. Receitas consistentes, mas discrepâncias em IVA sugerem necessidade de auditoria detalhada.</p><p><strong>Irregularidades:</strong> Saldo IVA alto no T2. Recomendação: Verificar fornecedores e faturas.</p>',
+      patrimonial: '<p><strong>Análise Patrimonial:</strong> Bens imóveis subavaliados. Possível evasão via IMI. Recomendação: Atualizar avaliações e cruzar com rendimentos.</p>',
+      risco: '<p><strong>Risco de Fraude:</strong> Alto risco baseado em padrões de declaração. Sugestão: Inspeção prioritária e cruzamento de dados externos.</p>'
+    };
+
+    document.getElementById('analysis-type').addEventListener('change', (e) => {
+      const type = e.target.value;
+      document.getElementById('analysis-content').innerHTML = analyses[type];
+    });
+
+    function backToContrib(){ window.location.href = 'contribuintes.html'; }
+
+    function compare() {
+      const nif2 = document.getElementById('compare-nif').value.trim();
+      if (nif2) {
+        window.location.href = 'comparacao.html?nif1=' + nif + '&nif2=' + nif2;
+      }
+    }
+
+    function goToFinal() {
+      window.location.href = 'relatorio_final.html?nif1=' + nif;
+    }
+
+    function openRequestModal() {
+      document.getElementById('request-modal').style.display = 'flex';
+    }
+
+    function closeRequestModal() {
+      document.getElementById('request-modal').style.display = 'none';
+    }
+
+    function submitRequest() {
+      const docType = document.getElementById('doc-type').value;
+      const reason = document.getElementById('reason').value;
+      if (!reason.trim()) {
+        alert('Por favor, forneça um motivo.');
+        return;
+      }
+      // Simular envio
+      alert(`Solicitação enviada: ${docType} - ${reason}`);
+      document.getElementById('request-form').reset();
+      closeRequestModal();
+    }
+
+    function downloadModule(type) {
+      alert('Download do ficheiro de ' + type + ' iniciado.');
+    }
+
+    // Chatbot functions
+    function toggleChat() {
+      const modal = document.getElementById('chat-modal');
+      modal.style.display = modal.style.display === 'flex' ? 'none' : 'flex';
+    }
+
+    function selectSuggestion(suggestion) {
+      document.getElementById('chat-input').value = suggestion;
+      sendMessage(); // Enviar automaticamente quando uma sugestão é selecionada
+    }
+
+    function sendMessage() {
+      const input = document.getElementById('chat-input');
+      const message = input.value.trim();
+      if (!message) return;
+
+      const chatMessages = document.getElementById('chat-messages');
+
+      // Adicionar mensagem do usuário
+      const userMessageDiv = document.createElement('div');
+      userMessageDiv.style.cssText = 'background: #e3f2fd; padding: 8px 12px; border-radius: 8px; margin: 8px 0; margin-left: 40px; text-align: right; color: #1565c0;';
+      userMessageDiv.innerHTML = '<strong>Você:</strong> ' + message;
+      chatMessages.appendChild(userMessageDiv);
+
+      // Simular resposta do chatbot
+      const responses = {
+        'Como posso estruturar uma inspeção fiscal eficiente para um contribuinte com múltiplas fontes de rendimento?': 'Baseado em entrevistas com inspetores seniores, uma inspeção eficiente começa com análise prévia de declarações e cruzamento de dados via E-Fatura e bancos. Priorize fontes de rendimento não declaradas, como aluguéis informais ou investimentos offshore. Use questionários estruturados para obter documentos em tempo hábil, evitando prolongamentos desnecessários. Sempre documente tudo para suportar decisões administrativas.',
+        'Quais são os sinais de alerta mais comuns de evasão fiscal identificados por inspetores experientes?': 'Inspetores seniores destacam discrepâncias entre rendimentos declarados e padrões de vida (ex.: veículos de luxo sem correspondência fiscal), omissões em declarações de IVA, ou transações com paraísos fiscais. Também alertam para contribuintes com múltiplas sociedades sem atividade económica real. Recomendam verificações cruzadas com registos bancários e imobiliários para identificar riscos.',
+        'Como lidar com contribuintes que resistem à cooperação durante uma inspeção, segundo práticas de inspetores veteranos?': 'De acordo com inspetores experientes, mantenha comunicação profissional e clara, explicando direitos e obrigações legais. Use intimações formais para obter documentos, evitando confrontos. Em casos de resistência, envolva superiores ou advogados fiscais. Documente todas as interações para proteger contra reclamações. Priorize resolução amigável quando possível, mas seja firme na aplicação da lei.',
+        'Quais estratégias de planeamento fiscal agressivo os inspetores seniores mais frequentemente encontram e como combatê-las?': 'Inspetores veteranos relatam esquemas como deduções artificiais de despesas, uso de offshores para ocultar rendimentos, ou manipulação de preços de transferência. Combata com análise de substância económica, verificações internacionais via acordos de troca de informações, e aplicação de regras anti-abuso (GAAR). Sempre justifique ajustes com evidências robustas para suportar impugnações.',
+        'Como garantir que uma correção fiscal seja justa e sustentável em tribunal, baseado em experiências de inspetores?': 'Inspetores seniores enfatizam a importância de fundamentar correções em legislação clara e precedentes jurisprudenciais. Colete evidências irrefutáveis, como documentos bancários ou testemunhos. Evite estimativas arbitrárias; use métodos conservadores. Prepare relatórios detalhados explicando raciocínio, facilitando defesa em tribunais administrativos. Sempre considere negociações para acordos mutuamente aceitáveis.'
+      };
+
+      const response = responses[message] || 'Desculpe, não tenho uma resposta específica para essa pergunta. Recomendo consultar o Portal das Finanças ou um profissional qualificado.';
+
+      // Adicionar resposta do bot
+      setTimeout(() => {
+        const botMessageDiv = document.createElement('div');
+        botMessageDiv.style.cssText = 'background: #f5f5f5; padding: 8px 12px; border-radius: 8px; margin: 8px 0; margin-right: 40px; color: #424242;';
+        botMessageDiv.innerHTML = '<strong>Assistente Fiscal:</strong> ' + response;
+        chatMessages.appendChild(botMessageDiv);
+
+        // Scroll automático para a mensagem mais recente
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+      }, 500); // Pequeno delay para simular resposta
+
+      input.value = '';
+
+      // Scroll automático para a mensagem do usuário
+      chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+
+    // Permitir enviar mensagem com Enter
+    document.getElementById('chat-input').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        sendMessage();
+      }
+    });
+  </script>
+
+  <!-- Chatbot -->
+  <button class="chatbot-btn" onclick="toggleChat()" title="Chatbot de Apoio Fiscal">
+    💬
+  </button>
+
+  <div class="chat-modal" id="chat-modal">
+    <div class="chat-header">
+      <div>
+        <strong>Assistente Fiscal AI</strong>
+      </div>
+      <button class="close-chat" onclick="toggleChat()">×</button>
+    </div>
+    <div class="chat-messages" id="chat-messages">
+      <div style="margin-bottom: 16px;">
+        <strong>Olá! Como posso ajudar com questões fiscais?</strong>
+      </div>
+      <div style="font-size: 14px; color: var(--muted); margin-bottom: 12px;">Sugestões rápidas:</div>
+      <button class="suggestion-btn" onclick="selectSuggestion('Como posso estruturar uma inspeção fiscal eficiente para um contribuinte com múltiplas fontes de rendimento?')">Como posso estruturar uma inspeção fiscal eficiente para um contribuinte com múltiplas fontes de rendimento?</button>
+      <button class="suggestion-btn" onclick="selectSuggestion('Quais são os sinais de alerta mais comuns de evasão fiscal identificados por inspetores experientes?')">Quais são os sinais de alerta mais comuns de evasão fiscal identificados por inspetores experientes?</button>
+      <button class="suggestion-btn" onclick="selectSuggestion('Como lidar com contribuintes que resistem à cooperação durante uma inspeção, segundo práticas de inspetores veteranos?')">Como lidar com contribuintes que resistem à cooperação durante uma inspeção, segundo práticas de inspetores veteranos?</button>
+      <button class="suggestion-btn" onclick="selectSuggestion('Quais estratégias de planeamento fiscal agressivo os inspetores seniores mais frequentemente encontram e como combatê-las?')">Quais estratégias de planeamento fiscal agressivo os inspetores seniores mais frequentemente encontram e como combatê-las?</button>
+      <button class="suggestion-btn" onclick="selectSuggestion('Como garantir que uma correção fiscal seja justa e sustentável em tribunal, baseado em experiências de inspetores?')">Como garantir que uma correção fiscal seja justa e sustentável em tribunal, baseado em experiências de inspetores?</button>
+    </div>
+    <div class="chat-input-area">
+      <textarea class="chat-input" id="chat-input" placeholder="Digite sua pergunta..." rows="2"></textarea>
+      <button class="btn primary" onclick="sendMessage()" style="margin-top: 8px; width: 100%;">Enviar</button>
+    </div>
+  </div>
+</body>
+</html>

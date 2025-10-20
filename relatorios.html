@@ -1,0 +1,401 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Relatórios — Dashboard Inspetivo</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+</head>
+<body>
+  <div class="frame">
+    <div class="topbar">
+      <div class="brand">
+        <div class="hamburger" id="hamburger" aria-label="Abrir menu" title="Menu">
+          <div class="bars"></div>
+        </div>
+        <img src="logo-at.png" alt="Logo ATD" class="logo">
+        <div>
+          <div style="font-weight:700">Painel Inspetivo — Antónia</div>
+          <div style="font-size:12px;color:var(--muted)">Relatórios</div>
+        </div>
+      </div>
+      <select id="fiscal-year" style="padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:var(--bg);color:var(--muted);">
+        <option value="2023">Ano Fiscal 2023</option>
+        <option value="2024">Ano Fiscal 2024</option>
+        <option value="2025" selected>Ano Fiscal 2025</option>
+      </select>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="menu-title">Menu</div>
+        <button class="btn ghost close-btn" onclick="closeSidebar()" style="font-size:18px;">×</button>
+      </div>
+      <div class="menu-list">
+        <a class="menu-item" href="dashboard.html">Dashboard</a>
+        <a class="menu-item" href="contribuintes.html">Contribuintes</a>
+        <a class="menu-item" href="casos.html">Casos Fechados</a>
+        <a class="menu-item" href="relatorios.html">Relatórios</a>
+        <a class="menu-item" href="equipa.html">Equipa</a>
+        <a class="menu-item" href="gestor.html">Gestor</a>
+        <a class="menu-item" href="elearning.html">Elearning</a>
+        <a class="menu-item" href="notificacoes.html">Notificações</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <h2>Relatórios</h2>
+        <div style="display:flex;gap:8px">
+          <select id="filtro-status" style="padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:var(--bg);color:var(--muted);">
+            <option value="todos">Todos os Status</option>
+            <option value="Aprovado">Aprovado</option>
+            <option value="Em Revisão">Em Revisão</option>
+            <option value="Concluído">Concluído</option>
+          </select>
+          <select id="filtro-prioridade" style="padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:var(--bg);color:var(--muted);">
+            <option value="todos">Todas as Prioridades</option>
+            <option value="10">10</option>
+            <option value="9">9</option>
+            <option value="8">8</option>
+            <option value="7">7</option>
+            <option value="6">6</option>
+            <option value="5">5</option>
+            <option value="4">4</option>
+            <option value="3">3</option>
+            <option value="2">2</option>
+            <option value="1">1</option>
+            <option value="0">0</option>
+          </select>
+          <button class="btn primary" onclick="exportarRelatorios()" style="padding:6px 12px">Exportar Relatórios</button>
+        </div>
+      </div>
+      <div style="display:flex;gap:16px;margin-bottom:16px">
+        <div style="background:rgba(255,255,255,0.02);padding:16px;border-radius:8px;flex:1;text-align:center">
+          <div style="font-size:24px;font-weight:700;color:#1e40af" id="num-relatorios">8</div>
+          <div style="color:var(--muted)">Relatórios Submetidos</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.02);padding:16px;border-radius:8px;flex:1;text-align:center">
+          <div style="font-size:24px;font-weight:700;color:#3b82f6" id="num-pendentes">2</div>
+          <div style="color:var(--muted)">Em Revisão</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.02);padding:16px;border-radius:8px;flex:1;text-align:center">
+          <div style="font-size:24px;font-weight:700;color:var(--accent)" id="valor-total">€185.430</div>
+          <div style="color:var(--muted)">Valor Total Identificado</div>
+        </div>
+      </div>
+      <div class="card">
+        <div id="relatorios-container"></div>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Sidebar hamburger
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('hamburger').addEventListener('click',()=>{
+      sidebar.classList.toggle('open');
+    });
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+    }
+
+    function toggleAccordion(header) {
+      const content = header.nextElementSibling;
+      const isOpen = content.style.display === 'block';
+      content.style.display = isOpen ? 'none' : 'block';
+      header.innerHTML = header.innerHTML.replace(isOpen ? ' ▲' : ' ▼', isOpen ? ' ▼' : ' ▲');
+    }
+
+    // Close sidebar on link click
+    document.querySelectorAll('.menu-item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        sidebar.classList.remove('open');
+      });
+    });
+
+    // Filtros
+    document.getElementById('filtro-status').addEventListener('change', atualizarRelatorios);
+    document.getElementById('filtro-prioridade').addEventListener('change', atualizarRelatorios);
+
+    function exportarRelatorios() {
+      alert('Funcionalidade de exportação em desenvolvimento. Os relatórios seriam exportados em formato PDF/Excel.');
+    }
+
+    function atualizarRelatorios(){
+      const container = document.getElementById('relatorios-container');
+      const filtroStatus = document.getElementById('filtro-status').value;
+      const filtroPrioridade = document.getElementById('filtro-prioridade').value;
+      
+      container.innerHTML = '';
+      let relatorios = [
+        {
+          nome: 'Caso Empresa B - Fornecedores Inativos',
+          author: 'Antónia Silva',
+          data: '2025-09-21',
+          prioridade: 10,
+          status: 'Aprovado',
+          valor: '€67.230',
+          nif: '123456789',
+          empresa: 'TechSolutions Lda',
+          descricao: 'Análise detalhada revelou uma rede de fornecedores inativos com transações simuladas totalizando €67.230. Identificadas 15 faturas falsas emitidas por empresas fantasma. Recomenda-se ação judicial contra os responsáveis e recuperação fiscal através de processo de execução fiscal.',
+          irregularidades: [
+            'Emissão de faturas falsas por fornecedores não existentes',
+            'Dedução indevida de IVA em montante de €12.345',
+            'Ausência de entrega efetiva dos bens/serviços faturados',
+            'Uso coordenado de NIFs de empresas dissolvidas'
+          ],
+          recomendacoes: [
+            'Iniciar processo de execução fiscal',
+            'Comunicar ao Ministério Público para investigação criminal',
+            'Aplicar coimas acessórias no valor de €33.615',
+            'Implementar sistema de verificação prévia de fornecedores'
+          ],
+          documentos: ['Relatório de Inspeção', 'Análise SAF-T', 'Declarações de IVA', 'Extratos bancários']
+        },
+        {
+          nome: 'Caso Empresa C - Diferenças IVA/IRC',
+          author: 'Antónia Silva',
+          data: '2025-09-29',
+          prioridade: 6,
+          status: 'Em Revisão',
+          valor: '€45.890',
+          nif: '234567890',
+          empresa: 'Construtora Moderna SA',
+          descricao: 'Identificadas diferenças significativas entre os valores declarados em IVA e IRC, sugerindo manipulação de custos dedutíveis. Análise preliminar indica subavaliação de custos em €45.890, com impacto direto na tributação autónoma.',
+          irregularidades: [
+            'Inconsistência entre custos declarados em IVA vs IRC',
+            'Subavaliação de custos operacionais em 23%',
+            'Aplicação incorreta de coeficientes de imputação',
+            'Omissão de rendimentos acessórios no IRC'
+          ],
+          recomendacoes: [
+            'Solicitar documentação adicional (contabilidade analítica)',
+            'Realizar perícia contabilística independente',
+            'Avaliar aplicação de tributação autónoma',
+            'Verificar compliance com normas IFRS'
+          ],
+          documentos: ['Declarações fiscais 2023-2025', 'Contabilidade geral', 'Análise de custos']
+        },
+        {
+          nome: 'Caso Empresa D - Verificação de Faturas',
+          author: 'Antónia Silva',
+          data: '2025-10-02',
+          prioridade: 2,
+          status: 'Concluído',
+          valor: '€12.450',
+          nif: '345678901',
+          empresa: 'Comércio Tradicional Lda',
+          descricao: 'Verificação completa de 127 faturas emitidas no exercício 2024. Identificadas 8 faturas com discrepâncias menores, totalizando €12.450 em deduções indevidas. Irregularidades corrigidas voluntariamente pelo contribuinte.',
+          irregularidades: [
+            'Faturas com valores superiores aos preços de mercado',
+            'Ausência de comprovativos de pagamento em 3 casos',
+            'Duplicação de deduções em 2 faturas',
+            'Aplicação incorreta de taxas de IVA'
+          ],
+          recomendacoes: [
+            'Correção voluntária aceita - redução de imposto em €2.890',
+            'Aplicação de juros compensatórios de €890',
+            'Recomendação de implementação de controlo interno',
+            'Monitorização durante os próximos 2 exercícios'
+          ],
+          documentos: ['Faturas verificadas', 'Comprovativos de pagamento', 'Relatório de correção']
+        },
+        {
+          nome: 'Caso Empresa E - Benefícios Fiscais I&D',
+          author: 'Antónia Silva',
+          data: '2025-10-05',
+          prioridade: 9,
+          status: 'Em Revisão',
+          valor: '€89.200',
+          nif: '456789012',
+          empresa: 'InnovTech Portugal SA',
+          descricao: 'Análise dos benefícios fiscais em Investigação & Desenvolvimento revelou deduções excessivas de €89.200. Projeto "Quantum Computing" não cumpre os requisitos legais para majoração de 50%, sendo elegível apenas para majoração base de 32,5%.',
+          irregularidades: [
+            'Aplicação indevida de majoração de 50% em projeto não elegível',
+            'Documentação técnica insuficiente para justificar atividades I&D',
+            'Custos indiretos imputados incorretamente ao projeto',
+            'Ausência de relatório técnico detalhado'
+          ],
+          recomendacoes: [
+            'Recuperação fiscal através de liquidação adicional',
+            'Solicitar documentação técnica complementar',
+            'Avaliar elegibilidade para majoração reduzida',
+            'Implementar sistema de controlo prévio de benefícios fiscais'
+          ],
+          documentos: ['Projeto I&D', 'Relatórios técnicos', 'Declarações modelo 39']
+        },
+        {
+          nome: 'Caso Empresa F - Preços de Transferência',
+          author: 'Antónia Silva',
+          data: '2025-10-08',
+          prioridade: 10,
+          status: 'Aprovado',
+          valor: '€156.780',
+          nif: '567890123',
+          empresa: 'Grupo Internacional Holding',
+          descricao: 'Análise de preços de transferência entre entidades do grupo revelou subavaliação sistemática de royalties de propriedade intelectual. Valor recuperado de €156.780 através de correção dos preços praticados.',
+          irregularidades: [
+            'Royalties cobrados abaixo do valor de mercado em 35%',
+            'Ausência de documentação de comparability study',
+            'Aplicação de métodos inadequados de determinação de preços',
+            'Transações não documentadas adequadamente'
+          ],
+          recomendacoes: [
+            'Correção dos preços de transferência aplicada',
+            'Implementação de documentação adequada (Master File/Local File)',
+            'Revisão da política de preços de transferência do grupo',
+            'Formação interna em compliance fiscal internacional'
+          ],
+          documentos: ['Análise económica', 'Master File', 'Contratos intragrupo', 'Comparability study']
+        },
+        {
+          nome: 'Caso Empresa G - Rendimentos de Capital',
+          author: 'Antónia Silva',
+          data: '2025-10-10',
+          prioridade: 5,
+          status: 'Concluído',
+          valor: '€23.670',
+          nif: '678901234',
+          empresa: 'Investimentos Premium Lda',
+          descricao: 'Verificação de rendimentos de capital revelou omissão de dividendos recebidos de fonte estrangeira no montante de €23.670. Contribuinte procedeu à correção voluntária após notificação.',
+          irregularidades: [
+            'Omissão de dividendos estrangeiros na declaração IRS',
+            'Ausência de retenção na fonte não comunicada',
+            'Não cumprimento da obrigação de declarar rendimentos',
+            'Aplicação incorreta da Convenção para Evitar Dupla Tributação'
+          ],
+          recomendacoes: [
+            'Correção voluntária processada com sucesso',
+            'Aplicação de juros de mora reduzidos (50%)',
+            'Recomendação de assessoria fiscal especializada',
+            'Monitorização de compliance futura'
+          ],
+          documentos: ['Declaração IRS retificativa', 'Comprovativos dividendos', 'Certificado retenção']
+        },
+        {
+          nome: 'Caso Empresa H - Atividade Insuficiente',
+          author: 'Antónia Silva',
+          data: '2025-10-12',
+          prioridade: 4,
+          status: 'Em Revisão',
+          valor: '€18.340',
+          nif: '789012345',
+          empresa: 'Serviços Gerais Unipessoal Lda',
+          descricao: 'Análise da atividade económica revelou volume de negócios insuficiente para justificar os custos declarados. Identificada dedução excessiva de €18.340 em despesas operacionais.',
+          irregularidades: [
+            'Volume de vendas incompatível com estrutura de custos',
+            'Dedução de despesas não relacionadas com atividade',
+            'Ausência de justificação económica para determinados custos',
+            'Possível utilização da empresa para fins pessoais'
+          ],
+          recomendacoes: [
+            'Solicitar documentação adicional sobre atividade económica',
+            'Realizar análise de risco comportamental',
+            'Avaliar aplicação de regime de tributação de rendimentos empresariais',
+            'Verificar compliance com obrigações declarativas'
+          ],
+          documentos: ['Contabilidade 2024', 'Faturas emitidas/recebidas', 'Extratos bancários']
+        },
+        {
+          nome: 'Caso Empresa I - IVA Intracomunitário',
+          author: 'Antónia Silva',
+          data: '2025-10-15',
+          prioridade: 8,
+          status: 'Aprovado',
+          valor: '€41.890',
+          nif: '890123456',
+          empresa: 'Exportadora Global SA',
+          descricao: 'Verificação das operações intracomunitárias revelou não declaração de IVA em importações no valor de €41.890. Contribuinte procedeu à regularização voluntária das declarações em falta.',
+          irregularidades: [
+            'Omissão de declaração de IVA em operações intracomunitárias',
+            'Ausência de registo adequado das transações VIES',
+            'Não cumprimento dos prazos de declaração mensal',
+            'Aplicação incorreta das regras de localização do IVA'
+          ],
+          recomendacoes: [
+            'Regularização voluntária concluída com sucesso',
+            'Aplicação de coimas reduzidas por correção espontânea',
+            'Implementação de sistema de controlo IVA intracomunitário',
+            'Formação específica em IVA internacional'
+          ],
+          documentos: ['Declarações IVA retificativas', 'Registos VIES', 'Faturas intracomunitárias']
+        }
+      ];
+      relatorios = relatorios.filter(r => r.author.includes('Antónia'));
+      
+      // Aplicar filtros
+      if (filtroStatus !== 'todos') {
+        relatorios = relatorios.filter(r => r.status === filtroStatus);
+      }
+      if (filtroPrioridade !== 'todos') {
+        relatorios = relatorios.filter(r => r.prioridade >= parseInt(filtroPrioridade));
+      }
+      document.getElementById('num-relatorios').innerText = relatorios.length;
+      document.getElementById('num-pendentes').innerText = relatorios.filter(r => r.status === 'Em Revisão').length;
+      document.getElementById('valor-total').innerText = '€' + relatorios.reduce((sum, r) => sum + parseInt(r.valor.replace(/[€.]/g, '')), 0).toLocaleString();
+      
+      relatorios.forEach(r=>{
+        const card = document.createElement('div');
+        card.style.cssText = 'background:rgba(255,255,255,0.02);padding:16px;border-radius:8px;margin-bottom:12px;border-left:4px solid ' + (r.status === 'Aprovado' ? '#1e40af' : r.status === 'Concluído' ? '#1e40af' : '#3b82f6') + ';';
+        
+        let statusBadge = '';
+        if (r.status === 'Aprovado') statusBadge = '<span style="background:#1e40af;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600;margin-left:8px">Aprovado</span>';
+        else if (r.status === 'Concluído') statusBadge = '<span style="background:#1e40af;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600;margin-left:8px">Aprovado</span>';
+        else if (r.status === 'Em Revisão') statusBadge = '<span style="background:#3b82f6;color:#fff;padding:2px 8px;border-radius:12px;font-size:12px;font-weight:600;margin-left:8px">Em Revisão</span>';
+        
+        let prioridadeColor = r.prioridade >= 8 ? '#1e40af' : r.prioridade >= 5 ? '#3b82f6' : '#60a5fa';
+        
+        card.innerHTML = `
+          <div class="accordion-header" style="font-weight:600;margin-bottom:4px;cursor:pointer;display:flex;justify-content:space-between;align-items:center" onclick="toggleAccordion(this)">
+            <span>${r.empresa} (${r.nif})${statusBadge}</span>
+            <div><strong>Score:</strong> <span style="font-size:14px;color:${prioridadeColor};font-weight:600">${r.prioridade}</span></div>
+          </div>
+          <div class="accordion-content" style="display:none;color:var(--muted);font-size:14px;margin-top:8px;padding:12px;background:rgba(255,255,255,0.01);border-radius:6px">
+            <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;margin-bottom:12px">
+              <div><strong>Empresa:</strong> ${r.empresa}</div>
+              <div><strong>NIF:</strong> ${r.nif}</div>
+              <div><strong>Autor:</strong> ${r.author}</div>
+              <div><strong>Valor Identificado:</strong> <span style="color:var(--accent);font-weight:600">${r.valor}</span></div>
+              <div><strong>Data Submissão:</strong> ${r.data}</div>
+              <div><strong>Status:</strong> ${r.status}</div>
+            </div>
+            <p style="margin:8px 0"><strong>Resumo:</strong> ${r.descricao}</p>
+            
+            <div style="margin:12px 0">
+              <strong style="color:#dc2626">Irregularidades Identificadas:</strong>
+              <ul style="margin:4px 0;padding-left:20px">
+                ${r.irregularidades.map(item => `<li>${item}</li>`).join('')}
+              </ul>
+            </div>
+            
+            <div style="margin:12px 0">
+              <strong style="color:#1e40af">Recomendações:</strong>
+              <ul style="margin:4px 0;padding-left:20px">
+                ${r.recomendacoes.map(item => `<li>${item}</li>`).join('')}
+              </ul>
+            </div>
+            
+            <div style="margin:12px 0">
+              <strong>Documentos Anexados:</strong>
+              <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
+                ${r.documentos.map(doc => `<span style="background:rgba(59,130,246,0.1);color:var(--accent);padding:2px 8px;border-radius:4px;font-size:12px">${doc}</span>`).join('')}
+              </div>
+            </div>
+          </div>
+          <div style="color:var(--muted);font-size:12px;margin-top:8px;display:flex;justify-content:space-between">
+            <span>Submetido por ${r.author}</span>
+            <span>${r.data}</span>
+          </div>
+        `;
+        container.appendChild(card);
+      });
+    }
+
+    // Init
+    atualizarRelatorios();
+  </script>
+</body>
+</html>

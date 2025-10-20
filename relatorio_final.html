@@ -1,0 +1,258 @@
+<!doctype html>
+<html lang="pt">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Relatório Final — Dashboard Inspetivo</title>
+  <link href="https://fonts.googleapis.com/css2?family/Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+  <link href="styles.css" rel="stylesheet">
+    <style>
+    textarea{width:100%;min-height:200px;padding:8px;border-radius:8px;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.05);color:#e6eef8;resize:vertical}
+
+    input[type="file"]{margin:8px 0}
+  </style>
+</head>
+<body>
+  <div class="frame">
+    <div class="topbar">
+      <div class="brand">
+        <div class="hamburger" id="hamburger" aria-label="Abrir menu" title="Menu">
+          <div class="bars"></div>
+        </div>
+        <img src="logo-at.png" alt="Logo ATD" class="logo">
+        <div>
+          <div style="font-weight:700">Painel Inspetivo — Antónia</div>
+          <div style="font-size:12px;color:var(--muted)">Relatório Final</div>
+        </div>
+      </div>
+      <select id="fiscal-year" style="padding:6px;border-radius:6px;border:1px solid rgba(0,0,0,0.1);background:var(--bg);color:var(--muted);">
+        <option value="2023">Ano Fiscal 2023</option>
+        <option value="2024">Ano Fiscal 2024</option>
+        <option value="2025" selected>Ano Fiscal 2025</option>
+      </select>
+    </div>
+
+    <aside class="sidebar" id="sidebar">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+        <div class="menu-title">Menu</div>
+        <button class="btn ghost close-btn" onclick="closeSidebar()" style="font-size:18px;">×</button>
+      </div>
+      <div class="menu-list">
+        <a class="menu-item" href="dashboard.html">Dashboard</a>
+        <a class="menu-item" href="contribuintes.html">Contribuintes</a>
+        <a class="menu-item" href="casos.html">Casos Fechados</a>
+        <a class="menu-item" href="relatorios.html">Relatórios</a>
+        <a class="menu-item" href="equipa.html">Equipa</a>
+        <a class="menu-item" href="gestor.html">Gestor</a>
+        <a class="menu-item" href="elearning.html">Elearning</a>
+        <a class="menu-item" href="notificacoes.html">Notificações</a>
+      </div>
+    </aside>
+
+    <main class="main">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h2>Relatório Final: <span id="nif1"></span><span id="vs" style="display:none;"> vs </span><span id="nif2"></span></h2>
+        <button class="btn ghost" onclick="backToComparison()">Voltar</button>
+      </div>
+
+      <div class="card">
+        <h3 style="display:flex;justify-content:space-between;align-items:center;">Análise do Caso <button class="btn primary" onclick="showAISuggestion()">Sugestão Análise por AI</button></h3>
+        <div id="ai-suggestion" style="display:none;padding:12px;border-radius:8px;background:rgba(96,165,250,0.1);margin-bottom:12px;">
+          <p id="ai-text"></p>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn primary" onclick="acceptAI()">Aceitar</button>
+            <button class="btn ghost" onclick="closeAI()">Fechar</button>
+          </div>
+        </div>
+        <div id="editor" style="height: 200px;"></div>
+        <br><br>
+        <button class="btn ghost" onclick="saveAnalysis()">Gravar Análise</button>
+      </div>
+
+      <div class="card">
+        <h3>Anexar Ficheiros</h3>
+        <input type="file" id="files" multiple>
+        <p style="font-size:12px;color:var(--muted)">Selecione um ou mais ficheiros para anexar ao relatório.</p>
+      </div>
+
+      <div class="card">
+        <button class="btn primary" onclick="submitReport()">Submeter Relatório</button>
+      </div>
+    </main>
+  </div>
+
+  <script src="https://cdn.quilljs.com/1.3.6/quill.js"></script>
+  <script>
+    // Sidebar hamburger
+    const sidebar = document.getElementById('sidebar');
+    document.getElementById('hamburger').addEventListener('click',()=>{
+      sidebar.classList.toggle('open');
+    });
+
+    function closeSidebar() {
+      sidebar.classList.remove('open');
+    }
+
+    // Close sidebar on link click
+    document.querySelectorAll('.menu-item').forEach(el=>{
+      el.addEventListener('click',()=>{
+        sidebar.classList.remove('open');
+      });
+    });
+
+    // Initialize Quill
+    var quill = new Quill('#editor', {
+      theme: 'snow',
+      modules: {
+        toolbar: [
+          ['bold', 'italic', 'underline', 'strike'],
+          [{ 'color': [] }, { 'background': [] }],
+          [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+          [{ 'header': [1, 2, 3, false] }],
+          ['clean']
+        ]
+      }
+    });
+
+    // Preencher NIFs
+    const urlParams = new URLSearchParams(window.location.search);
+    const nif1 = urlParams.get('nif1');
+    const nif2 = urlParams.get('nif2');
+    if (nif1) {
+      document.getElementById('nif1').innerText = nif1;
+      if (nif2) {
+        document.getElementById('vs').style.display = 'inline';
+        document.getElementById('nif2').innerText = nif2;
+      }
+    }
+
+    function showAISuggestion() {
+      let aiText = '';
+      if (nif2) {
+        aiText = `RELATÓRIO DE ANÁLISE INSPETIVA - CONTRIBUINTES ${nif1} E ${nif2}
+
+DATA: ${new Date().toLocaleDateString('pt-PT')}
+ANO FISCAL: 2025
+
+1. INTRODUÇÃO E CONTEXTO
+Análise comparativa realizada entre dois contribuintes com atividades económicas similares (comércio e serviços), ambos com sistemas E-Fatura ativos e certificados VIES emitidos. A comparação revelou diferenças significativas nos padrões de conformidade fiscal, com o Contribuinte 2 apresentando perfil de risco substancialmente superior.
+
+2. IRREGULARIDADES IDENTIFICADAS
+
+2.1 CONTRIBUINTE 1 (${nif1})
+- IVA: Subdeclaração de custos no T2 (€135.000 vendas vs €90.000 compras)
+- IRS: Inconsistência com MOD40 (€4.500 declarados vs €5.000 reportados)
+- Património: Subavaliação imobiliária (€250.000 vs mercado €350.000)
+- E-Fatura: Padrões suspeitos com fornecedores de baixo risco fiscal
+- Dívidas: Pendências em IMI e IVA T3
+RISCO: MÉDIO - Possível evasão localizada
+
+2.2 CONTRIBUINTE 2 (${nif2})
+- IVA: Irregularidades graves (€180.000 vendas vs €95.000 compras no T2)
+- IRS: Omissões significativas (€3.200 declarados vs €6.500 MOD40)
+- Património: Avaliações questionáveis (mansão €800.000 pendente)
+- E-Fatura: 15 erros detetados, possível manipulação sistemática
+- Dívidas: €15.200 acumuladas (IVA T3 €13.800, IMI €5.125)
+- Acessórias: Anexo C não apresentado
+RISCO: ALTO - Evasão sistemática provável
+
+3. DIFERENÇAS NOTÁVEIS
+- Contribuinte 2 apresenta discrepâncias 3x maiores em IVA e IRS
+- Volume de transações VIES: €120.000 (C2) vs €65.000 (C1)
+- IRC: Lucros elevados com custos relativamente baixos no C2
+- Possível ligação intra-grupo através de transações não declaradas
+
+4. RECOMENDAÇÕES DE INVESTIGAÇÃO
+4.1 Prioritária: Investigação conjunta dos dois contribuintes
+4.2 Cruzamento de dados E-Fatura e VIES entre NIFs
+4.3 Perícia patrimonial independente para ambos
+4.4 Análise de transações bancárias internacionais
+4.5 Investigação de fornecedores comuns e triangulações
+4.6 Verificação de rendas efetivamente recebidas vs declaradas
+
+5. CONCLUSÃO
+Os padrões identificados sugerem possível rede de evasão fiscal organizada, com o Contribuinte 2 como elemento central. Recomenda-se abertura imediata de processo inspetivo conjunto, com prioridade para medidas cautelares (penhoras, arrestos) no património do Contribuinte 2.
+
+Data de geração: ${new Date().toLocaleString('pt-PT')}`;
+      } else {
+        aiText = `RELATÓRIO DE ANÁLISE INSPETIVA - CONTRIBUINTE ${nif1}
+
+DATA: ${new Date().toLocaleDateString('pt-PT')}
+ANO FISCAL: 2025
+
+1. INTRODUÇÃO
+Análise individual do contribuinte ${nif1} (Empresa A, Lda.), com atividade económica no setor do comércio a retalho de eletrodomésticos. Constituição em 01/01/2010, regime fiscal normal, cadastro atualizado.
+
+2. IRREGULARIDADES IDENTIFICADAS
+- IVA: Subdeclaração de custos no trimestre T2 (€135.000 vendas vs €90.000 compras)
+- IRS: Discrepância com MOD40 (€4.500 declarados vs €5.000 reportados)
+- Património: Subavaliação do apartamento em Lisboa (€250.000 vs €350.000 mercado)
+- E-Fatura: Transações frequentes com fornecedores de baixo risco fiscal
+- Dívidas: Pendências ativas em IMI (€1.350) e IVA T3 (€8.050)
+
+3. ANÁLISE DE RISCO
+Perfil de risco MÉDIO, com indícios de evasão localizada mas não sistemática. As irregularidades concentram-se no IVA e IRS, com possível omissão de rendimentos de capital.
+
+4. RECOMENDAÇÕES
+- Auditoria detalhada das faturas do IVA T2
+- Investigação dos rendimentos de capital não declarados
+- Perícia independente para avaliação patrimonial
+- Regularização urgente das pendências fiscais
+- Monitorização contínua do E-Fatura
+
+5. CONCLUSÃO
+Recomenda-se abertura de processo inspetivo com medidas cautelares limitadas, focando na recuperação dos valores sonegados e correção das declarações.
+
+Data de geração: ${new Date().toLocaleString('pt-PT')}`;
+      }
+      document.getElementById('ai-text').innerText = aiText;
+      document.getElementById('ai-suggestion').style.display = 'block';
+    }
+
+    function acceptAI() {
+      const aiText = document.getElementById('ai-text').innerText;
+      quill.setText(aiText);
+      quill.root.setAttribute('data-ai', 'true');
+      closeAI();
+    }
+
+    function closeAI() {
+      document.getElementById('ai-suggestion').style.display = 'none';
+    }
+
+    function saveAnalysis() {
+      const text = quill.getText().trim();
+      if (text) {
+        const key = nif2 ? `analysis_${nif1}_${nif2}` : `analysis_${nif1}`;
+        localStorage.setItem(key, quill.root.innerHTML);
+        localStorage.setItem(`ai_${key}`, quill.root.getAttribute('data-ai') || 'false');
+        alert('Análise gravada com sucesso!');
+      } else {
+        alert('Não há análise para gravar.');
+      }
+    }
+
+    function submitReport() {
+      const analysis = quill.getText().trim();
+      const files = document.getElementById('files').files;
+      if (!analysis) {
+        alert('Por favor, escreva uma análise antes de submeter.');
+        return;
+      }
+      // Simulação de submissão
+      alert('Relatório submetido com sucesso!');
+      // Redirecionar para casos resolvidos
+      window.location.href = 'casos_resolvidos.html?nif1=' + nif1 + '&nif2=' + nif2;
+    }
+
+    function backToComparison() {
+      if (nif2) {
+        window.location.href = 'comparacao.html?nif1=' + nif1 + '&nif2=' + nif2;
+      } else {
+        window.location.href = 'detail.html?nif=' + nif1;
+      }
+    }
+  </script>
+</body>
+</html>
